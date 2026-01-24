@@ -39,6 +39,12 @@ object Protocol {
 
     /** Sender key info prefix for bidirectional decryption. */
     val SENDER_KEY_INFO_PREFIX = "AlgoChatV1-SenderKey".toByteArray()
+
+    /** Size of an Ed25519 signature in bytes. */
+    const val SIGNATURE_SIZE = 64
+
+    /** Minimum payment amount in microAlgos. */
+    const val MINIMUM_PAYMENT = 1000L
 }
 
 /**
@@ -56,4 +62,47 @@ data class DecryptedContent(
 /**
  * Exception thrown for AlgoChat errors.
  */
-class AlgoChatException(message: String, cause: Throwable? = null) : Exception(message, cause)
+sealed class AlgoChatException(message: String, cause: Throwable? = null) : Exception(message, cause) {
+    /** Invalid public key format or length. */
+    class InvalidPublicKey(details: String) : AlgoChatException("Invalid public key: $details")
+
+    /** Key derivation failed. */
+    class KeyDerivationFailed(details: String) : AlgoChatException("Key derivation failed: $details")
+
+    /** Invalid signature format or verification failed. */
+    class InvalidSignature(details: String) : AlgoChatException("Invalid signature: $details")
+
+    /** Encryption failed. */
+    class EncryptionFailed(details: String) : AlgoChatException("Encryption failed: $details")
+
+    /** Decryption failed. */
+    class DecryptionFailed(details: String) : AlgoChatException("Decryption failed: $details")
+
+    /** Invalid envelope format. */
+    class InvalidEnvelope(details: String) : AlgoChatException("Invalid envelope: $details")
+
+    /** Indexer not configured. */
+    class IndexerNotConfigured : AlgoChatException("Indexer not configured")
+
+    /** Public key not found for address. */
+    class PublicKeyNotFound(address: String) : AlgoChatException("Public key not found for address: $address")
+
+    /** Invalid recipient address. */
+    class InvalidRecipient(details: String) : AlgoChatException("Invalid recipient: $details")
+
+    /** Transaction failed. */
+    class TransactionFailed(details: String) : AlgoChatException("Transaction failed: $details")
+
+    /** Insufficient balance. */
+    class InsufficientBalance(required: Long, available: Long) :
+        AlgoChatException("Insufficient balance: required $required, available $available")
+
+    /** Key not found in storage. */
+    class KeyNotFound(address: String) : AlgoChatException("Key not found for address: $address")
+
+    /** Storage operation failed. */
+    class StorageFailed(details: String) : AlgoChatException("Storage failed: $details")
+
+    /** Message not found. */
+    class MessageNotFound(id: String) : AlgoChatException("Message not found: $id")
+}

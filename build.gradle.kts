@@ -13,9 +13,11 @@ repositories {
 
 dependencies {
     implementation("org.bouncycastle:bcprov-jdk18on:1.77")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
