@@ -198,6 +198,38 @@ class CrossImplTest {
     }
 
     @Test
+    fun `decrypt Kotlin envelopes`() {
+        val kotlinDir = findEnvelopeDir("kotlin")
+        if (kotlinDir == null) {
+            println("Skipping Kotlin envelope tests - directory not found")
+            return
+        }
+
+        val bob = bobKeys()
+        var passed = 0
+        var failed = 0
+
+        for ((key, expected) in TEST_MESSAGES) {
+            val file = File(kotlinDir, "$key.hex")
+            val decrypted = decryptEnvelopeFile(file, bob)
+
+            if (decrypted == expected) {
+                passed++
+                println("✓ $key")
+            } else if (decrypted != null) {
+                failed++
+                println("✗ $key - mismatch")
+            } else if (file.exists()) {
+                failed++
+                println("✗ $key - failed to decrypt")
+            }
+        }
+
+        println("Kotlin cross-impl: $passed/${passed + failed} passed")
+        assertEquals(0, failed, "Some Kotlin envelopes failed to decrypt")
+    }
+
+    @Test
     fun `export envelopes for cross-implementation testing`() {
         val alice = aliceKeys()
         val bob = bobKeys()
