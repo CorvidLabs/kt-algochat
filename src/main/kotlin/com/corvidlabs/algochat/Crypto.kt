@@ -36,7 +36,7 @@ object Crypto {
         val messageBytes = plaintext.toByteArray(Charsets.UTF_8)
 
         if (messageBytes.size > Protocol.MAX_PAYLOAD_SIZE) {
-            throw AlgoChatException("Message too large: ${messageBytes.size} bytes (max ${Protocol.MAX_PAYLOAD_SIZE})")
+            throw AlgoChatException.EncryptionFailed("Message too large: ${messageBytes.size} bytes (max ${Protocol.MAX_PAYLOAD_SIZE})")
         }
 
         // Generate ephemeral key pair for this message

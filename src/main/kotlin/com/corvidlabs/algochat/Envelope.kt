@@ -87,18 +87,18 @@ data class ChatEnvelope(
          */
         fun decode(data: ByteArray): ChatEnvelope {
             if (data.size < Protocol.HEADER_SIZE) {
-                throw AlgoChatException("Data too short: ${data.size} bytes (minimum ${Protocol.HEADER_SIZE})")
+                throw AlgoChatException.InvalidEnvelope("Data too short: ${data.size} bytes (minimum ${Protocol.HEADER_SIZE})")
             }
 
             val version = data[0]
             val protocolId = data[1]
 
             if (version != Protocol.VERSION) {
-                throw AlgoChatException("Unknown version: $version")
+                throw AlgoChatException.InvalidEnvelope("Unknown version: $version")
             }
 
             if (protocolId != Protocol.PROTOCOL_ID) {
-                throw AlgoChatException("Unknown protocol ID: $protocolId")
+                throw AlgoChatException.InvalidEnvelope("Unknown protocol ID: $protocolId")
             }
 
             var offset = 2

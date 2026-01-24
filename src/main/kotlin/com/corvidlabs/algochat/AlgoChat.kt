@@ -2,6 +2,8 @@ package com.corvidlabs.algochat
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.bouncycastle.crypto.params.X25519PrivateKeyParameters
+import org.bouncycastle.crypto.params.X25519PublicKeyParameters
 import java.time.Instant
 
 /**
@@ -39,9 +41,7 @@ class AlgoChatClient private constructor(
     /** The user's Algorand address. */
     val address: String,
     private val ed25519PublicKey: ByteArray,
-    private val encryptionPrivateKey: ByteArray,
-    /** The user's encryption public key. */
-    val encryptionPublicKey: ByteArray,
+    private val encryptionKeyPair: KeyPair,
     private val config: AlgoChatConfig,
     private val algod: AlgodClient,
     private val indexer: IndexerClient,
@@ -52,6 +52,10 @@ class AlgoChatClient private constructor(
     private val sendQueue = SendQueue()
     private val conversations = mutableListOf<Conversation>()
     private val mutex = Mutex()
+
+    /** The user's encryption public key as bytes. */
+    val encryptionPublicKey: ByteArray
+        get() = Keys.publicKeyToBytes(encryptionKeyPair.publicKey)
 
     companion object {
         /**
@@ -71,16 +75,16 @@ class AlgoChatClient private constructor(
             require(seed.size == 32) { "Seed must be 32 bytes" }
 
             // Derive encryption keys from the seed
-            val (encryptionPrivateKey, encryptionPublicKey) = Keys.deriveKeysFromSeed(seed)
+            val keyPair = Keys.deriveKeysFromSeed(seed)
 
-            // Store the encryption key
-            keyStorage.store(encryptionPrivateKey, address, false)
+            // Store the encryption key (as bytes for storage)
+            val privateKeyBytes = keyPair.privateKey.encoded
+            keyStorage.store(privateKeyBytes, address, false)
 
             return AlgoChatClient(
                 address = address,
-                ed25519PublicKey = seed.copyOf(),  // The seed is also the Ed25519 public key in Algorand
-                encryptionPrivateKey = encryptionPrivateKey,
-                encryptionPublicKey = encryptionPublicKey,
+                ed25519PublicKey = seed.copyOf(),
+                encryptionKeyPair = keyPair,
                 config = config,
                 algod = algod,
                 indexer = indexer,
@@ -139,37 +143,36 @@ class AlgoChatClient private constructor(
     /**
      * Encrypts a message for a recipient.
      */
-    fun encrypt(message: String, recipientPublicKey: ByteArray): ByteArray {
-        val ciphertext = Crypto.encryptMessage(
-            message.toByteArray(Charsets.UTF_8),
-            recipientPublicKey,
-            encryptionPrivateKey
-        )
+    fun encrypt(message: String, recipientPublicKeyBytes: ByteArray): ByteArray {
+        val recipientPublicKey = Keys.publicKeyFromBytes(recipientPublicKeyBytes)
 
-        return Envelope.encode(
-            ciphertext,
-            encryptionPublicKey,
+        val envelope = Crypto.encryptMessage(
+            message,
+            encryptionKeyPair.privateKey,
+            encryptionKeyPair.publicKey,
             recipientPublicKey
         )
+
+        return envelope.encode()
     }
 
     /**
      * Decrypts a message from a sender.
      */
-    fun decrypt(envelope: ByteArray, senderPublicKey: ByteArray): String {
-        if (!Envelope.isChatMessage(envelope)) {
+    fun decrypt(envelopeBytes: ByteArray, senderPublicKeyBytes: ByteArray): String {
+        if (!isChatMessage(envelopeBytes)) {
             throw AlgoChatException.InvalidEnvelope("Not an AlgoChat message")
         }
 
-        val decoded = Envelope.decode(envelope)
+        val envelope = ChatEnvelope.decode(envelopeBytes)
 
-        val plaintext = Crypto.decryptMessage(
-            decoded.ciphertext,
-            senderPublicKey,
-            encryptionPrivateKey
-        )
+        val decrypted = Crypto.decryptMessage(
+            envelope,
+            encryptionKeyPair.privateKey,
+            encryptionKeyPair.publicKey
+        ) ?: throw AlgoChatException.DecryptionFailed("Failed to decrypt message")
 
-        return plaintext.toString(Charsets.UTF_8)
+        return decrypted.text
     }
 
     /**
@@ -177,7 +180,7 @@ class AlgoChatClient private constructor(
      */
     suspend fun processTransaction(tx: NoteTransaction): Message? {
         // Check if this is a chat message
-        if (!Envelope.isChatMessage(tx.note)) {
+        if (!isChatMessage(tx.note)) {
             return null
         }
 

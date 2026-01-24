@@ -31,7 +31,7 @@ object Keys {
      */
     fun deriveKeysFromSeed(seed: ByteArray): KeyPair {
         if (seed.size != 32) {
-            throw AlgoChatException("Seed must be 32 bytes, got ${seed.size}")
+            throw AlgoChatException.KeyDerivationFailed("Seed must be 32 bytes, got ${seed.size}")
         }
 
         // Derive key material using HKDF
