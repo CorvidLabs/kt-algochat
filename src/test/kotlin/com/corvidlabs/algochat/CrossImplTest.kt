@@ -14,6 +14,7 @@ import kotlin.test.assertTrue
  */
 class CrossImplTest {
     companion object {
+        const val ALICE_SEED_HEX = "0000000000000000000000000000000000000000000000000000000000000001"
         const val BOB_SEED_HEX = "0000000000000000000000000000000000000000000000000000000000000002"
 
         val TEST_MESSAGES = mapOf(
@@ -43,8 +44,16 @@ class CrossImplTest {
             return hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
         }
 
+        fun aliceKeys(): KeyPair {
+            return Keys.deriveKeysFromSeed(hexToBytes(ALICE_SEED_HEX))
+        }
+
         fun bobKeys(): KeyPair {
             return Keys.deriveKeysFromSeed(hexToBytes(BOB_SEED_HEX))
+        }
+
+        fun bytesToHex(bytes: ByteArray): String {
+            return bytes.joinToString("") { "%02x".format(it) }
         }
     }
 
@@ -149,5 +158,59 @@ class CrossImplTest {
 
         println("Python cross-impl: $passed/${passed + failed} passed")
         assertEquals(0, failed, "Some Python envelopes failed to decrypt")
+    }
+
+    @Test
+    fun `decrypt Rust envelopes`() {
+        val rustDir = File("../test-algochat/test-envelopes-rust")
+        if (!rustDir.exists()) {
+            println("Skipping Rust envelope tests - directory not found")
+            return
+        }
+
+        val bob = bobKeys()
+        var passed = 0
+        var failed = 0
+
+        for ((key, expected) in TEST_MESSAGES) {
+            val file = File(rustDir, "$key.hex")
+            val decrypted = decryptEnvelopeFile(file, bob)
+
+            if (decrypted == expected) {
+                passed++
+            } else if (file.exists()) {
+                failed++
+            }
+        }
+
+        println("Rust cross-impl: $passed/${passed + failed} passed")
+        assertEquals(0, failed, "Some Rust envelopes failed to decrypt")
+    }
+
+    @Test
+    fun `export envelopes for cross-implementation testing`() {
+        val alice = aliceKeys()
+        val bob = bobKeys()
+
+        val outputDir = File("../test-envelopes-kotlin")
+        outputDir.mkdirs()
+
+        var count = 0
+        for ((key, message) in TEST_MESSAGES) {
+            val envelope = Crypto.encryptMessage(
+                message,
+                alice.privateKey,
+                alice.publicKey,
+                bob.publicKey
+            )
+
+            val encoded = envelope.encode()
+            val hexEncoded = bytesToHex(encoded)
+
+            File(outputDir, "$key.hex").writeText(hexEncoded)
+            count++
+        }
+
+        println("Kotlin: exported $count envelopes to ${outputDir.path}")
     }
 }
