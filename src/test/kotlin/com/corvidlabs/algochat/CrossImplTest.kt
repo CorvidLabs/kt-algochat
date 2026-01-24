@@ -74,10 +74,20 @@ class CrossImplTest {
         }
     }
 
+    private fun findEnvelopeDir(implName: String): File? {
+        // Try CI path first (when kt-algochat is checked out inside test-algochat)
+        val ciPath = File("../test-envelopes-$implName")
+        if (ciPath.exists()) return ciPath
+        // Try local dev path (when repos are siblings)
+        val devPath = File("../test-algochat/test-envelopes-$implName")
+        if (devPath.exists()) return devPath
+        return null
+    }
+
     @Test
     fun `decrypt Swift envelopes`() {
-        val swiftDir = File("../test-algochat/test-envelopes-swift")
-        if (!swiftDir.exists()) {
+        val swiftDir = findEnvelopeDir("swift")
+        if (swiftDir == null) {
             println("Skipping Swift envelope tests - directory not found")
             return
         }
@@ -108,8 +118,8 @@ class CrossImplTest {
 
     @Test
     fun `decrypt TypeScript envelopes`() {
-        val tsDir = File("../test-algochat/test-envelopes-ts")
-        if (!tsDir.exists()) {
+        val tsDir = findEnvelopeDir("ts")
+        if (tsDir == null) {
             println("Skipping TypeScript envelope tests - directory not found")
             return
         }
@@ -135,8 +145,8 @@ class CrossImplTest {
 
     @Test
     fun `decrypt Python envelopes`() {
-        val pyDir = File("../test-algochat/test-envelopes-python")
-        if (!pyDir.exists()) {
+        val pyDir = findEnvelopeDir("python")
+        if (pyDir == null) {
             println("Skipping Python envelope tests - directory not found")
             return
         }
@@ -162,8 +172,8 @@ class CrossImplTest {
 
     @Test
     fun `decrypt Rust envelopes`() {
-        val rustDir = File("../test-algochat/test-envelopes-rust")
-        if (!rustDir.exists()) {
+        val rustDir = findEnvelopeDir("rust")
+        if (rustDir == null) {
             println("Skipping Rust envelope tests - directory not found")
             return
         }
