@@ -5,7 +5,7 @@ import org.bouncycastle.crypto.generators.HKDFBytesGenerator
 import org.bouncycastle.crypto.params.HKDFParameters
 import org.bouncycastle.crypto.params.X25519PrivateKeyParameters
 import org.bouncycastle.crypto.params.X25519PublicKeyParameters
-import org.bouncycastle.jcajce.provider.digest.SHA256
+import org.bouncycastle.crypto.digests.SHA256Digest
 import java.security.SecureRandom
 
 /**
@@ -35,7 +35,7 @@ object Keys {
         }
 
         // Derive key material using HKDF
-        val hkdf = HKDFBytesGenerator(SHA256.Digest())
+        val hkdf = HKDFBytesGenerator(SHA256Digest())
         hkdf.init(HKDFParameters(seed, Protocol.KEY_DERIVATION_SALT, Protocol.KEY_DERIVATION_INFO))
 
         val derivedKey = ByteArray(32)

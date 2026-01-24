@@ -9,7 +9,7 @@ import org.bouncycastle.crypto.params.HKDFParameters
 import org.bouncycastle.crypto.params.KeyParameter
 import org.bouncycastle.crypto.params.X25519PrivateKeyParameters
 import org.bouncycastle.crypto.params.X25519PublicKeyParameters
-import org.bouncycastle.jcajce.provider.digest.SHA256
+import org.bouncycastle.crypto.digests.SHA256Digest
 import java.security.SecureRandom
 
 /**
@@ -143,7 +143,7 @@ object Crypto {
     }
 
     private fun deriveKey(secret: ByteArray, salt: ByteArray, info: ByteArray): ByteArray {
-        val hkdf = HKDFBytesGenerator(SHA256.Digest())
+        val hkdf = HKDFBytesGenerator(SHA256Digest())
         hkdf.init(HKDFParameters(secret, salt, info))
 
         val key = ByteArray(32)
