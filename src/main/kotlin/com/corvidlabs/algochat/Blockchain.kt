@@ -205,6 +205,52 @@ suspend fun discoverEncryptionKey(
 }
 
 /**
+ * Decodes an Algorand address to extract the 32-byte Ed25519 public key.
+ *
+ * Algorand addresses are Base32-encoded (RFC 4648, no padding). The decoded
+ * bytes consist of 32 bytes of Ed25519 public key followed by a 4-byte checksum.
+ *
+ * @param address The Algorand address string (58 characters, Base32 no padding)
+ * @return The 32-byte Ed25519 public key
+ * @throws IllegalArgumentException if the address is invalid
+ */
+private fun decodeAlgorandAddress(address: String): ByteArray {
+    val decoded = base32Decode(address)
+    require(decoded.size == 36) {
+        "Decoded Algorand address must be 36 bytes (32 key + 4 checksum), got ${decoded.size}"
+    }
+    return decoded.copyOfRange(0, 32)
+}
+
+/**
+ * Decodes a Base32 (RFC 4648) encoded string without padding.
+ */
+private fun base32Decode(input: String): ByteArray {
+    val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+    val trimmed = input.trimEnd('=')
+
+    val output = ByteArray(trimmed.length * 5 / 8)
+    var buffer = 0
+    var bitsLeft = 0
+    var index = 0
+
+    for (c in trimmed) {
+        val value = alphabet.indexOf(c.uppercaseChar())
+        require(value >= 0) { "Invalid Base32 character: $c" }
+
+        buffer = (buffer shl 5) or value
+        bitsLeft += 5
+
+        if (bitsLeft >= 8) {
+            bitsLeft -= 8
+            output[index++] = (buffer shr bitsLeft and 0xFF).toByte()
+        }
+    }
+
+    return output.copyOfRange(0, index)
+}
+
+/**
  * Parses a key announcement from a transaction note.
  */
 private fun parseKeyAnnouncement(note: ByteArray, address: String): DiscoveredKey? {
@@ -220,7 +266,8 @@ private fun parseKeyAnnouncement(note: ByteArray, address: String): DiscoveredKe
         // Has signature, verify it
         val signature = note.copyOfRange(32, 96)
         try {
-            Signature.verifyEncryptionKeyBytes(publicKey, publicKey, signature)
+            val ed25519PublicKey = decodeAlgorandAddress(address)
+            Signature.verifyEncryptionKeyBytes(publicKey, ed25519PublicKey, signature)
         } catch (e: Exception) {
             false
         }

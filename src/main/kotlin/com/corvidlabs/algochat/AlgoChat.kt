@@ -2,6 +2,7 @@ package com.corvidlabs.algochat
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import org.bouncycastle.crypto.params.X25519PrivateKeyParameters
 import org.bouncycastle.crypto.params.X25519PublicKeyParameters
 import java.time.Instant
@@ -81,9 +82,13 @@ class AlgoChatClient private constructor(
             val privateKeyBytes = keyPair.privateKey.encoded
             keyStorage.store(privateKeyBytes, address, false)
 
+            // Derive the Ed25519 public key from the seed (private key)
+            val ed25519Private = Ed25519PrivateKeyParameters(seed, 0)
+            val ed25519PublicKey = ed25519Private.generatePublicKey().encoded
+
             return AlgoChatClient(
                 address = address,
-                ed25519PublicKey = seed.copyOf(),
+                ed25519PublicKey = ed25519PublicKey,
                 encryptionKeyPair = keyPair,
                 config = config,
                 algod = algod,
