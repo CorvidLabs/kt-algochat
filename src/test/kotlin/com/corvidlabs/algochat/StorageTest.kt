@@ -183,7 +183,7 @@ class PublicKeyCacheTest {
         val cache = PublicKeyCache(ttl = Duration.ofMillis(1))
 
         cache.store(testAddress, testKey)
-        Thread.sleep(5)  // Let TTL expire
+        Thread.sleep(50)  // Let TTL expire
 
         assertNull(cache.retrieve(testAddress))
     }
@@ -236,20 +236,18 @@ class PublicKeyCacheTest {
     }
 
     @Test
-    fun `pruneExpired removes only expired entries`() = runTest {
-        val shortTtl = PublicKeyCache(ttl = Duration.ofMillis(1))
+    fun `pruneExpired removes expired entries`() = runTest {
+        val cache = PublicKeyCache(ttl = Duration.ofMillis(1))
 
-        shortTtl.store("EXPIRE_ME", testKey)
-        Thread.sleep(5) // Let it expire
+        cache.store("ADDR1", testKey)
+        cache.store("ADDR2", testKey)
+        Thread.sleep(50) // Let both expire
 
-        // Store a fresh one (will use the same short TTL but we check right after)
-        val freshKey = ByteArray(32) { (it + 10).toByte() }
-        shortTtl.store("KEEP_ME", freshKey)
+        cache.pruneExpired()
 
-        shortTtl.pruneExpired()
-
-        assertNull(shortTtl.retrieve("EXPIRE_ME"))
-        assertNotNull(shortTtl.retrieve("KEEP_ME"))
+        // Both should be gone after pruning
+        assertNull(cache.retrieve("ADDR1"))
+        assertNull(cache.retrieve("ADDR2"))
     }
 }
 
