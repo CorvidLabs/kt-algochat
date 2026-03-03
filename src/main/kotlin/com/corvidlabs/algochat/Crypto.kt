@@ -80,6 +80,35 @@ object Crypto {
     }
 
     /**
+     * Encrypt a reply message for a recipient.
+     *
+     * This is a convenience function that constructs the structured JSON payload
+     * containing the reply context and encrypts it.
+     *
+     * @param text Reply message text
+     * @param replyToTxid Transaction ID of the message being replied to
+     * @param replyToPreview Preview text of the original message (optional)
+     * @param senderPrivateKey Sender's X25519 private key (unused but kept for API compatibility)
+     * @param senderPublicKey Sender's X25519 public key
+     * @param recipientPublicKey Recipient's X25519 public key
+     * @return ChatEnvelope containing the encrypted reply
+     */
+    fun encryptReply(
+        text: String,
+        replyToTxid: String,
+        replyToPreview: String? = null,
+        senderPrivateKey: X25519PrivateKeyParameters,
+        senderPublicKey: X25519PublicKeyParameters,
+        recipientPublicKey: X25519PublicKeyParameters
+    ): ChatEnvelope {
+        val payload = String(
+            MessagePayloadCodec.encode(text, replyToTxid, replyToPreview),
+            Charsets.UTF_8
+        )
+        return encryptMessage(payload, senderPrivateKey, senderPublicKey, recipientPublicKey)
+    }
+
+    /**
      * Decrypt a message from an envelope.
      *
      * @param envelope The encrypted envelope
@@ -101,12 +130,11 @@ object Crypto {
             decryptAsRecipient(envelope, myPrivateKey, myPubBytes)
         }
 
-        // Check for key-publish payload
-        if (isKeyPublishPayload(plaintext)) {
+        if (MessagePayloadCodec.isKeyPublish(plaintext)) {
             return null
         }
 
-        return parseMessagePayload(plaintext)
+        return MessagePayloadCodec.decode(plaintext)
     }
 
     private fun decryptAsRecipient(
@@ -176,53 +204,4 @@ object Crypto {
         return output.copyOf(len)
     }
 
-    private fun isKeyPublishPayload(data: ByteArray): Boolean {
-        if (data.isEmpty() || data[0] != '{'.code.toByte()) {
-            return false
-        }
-        return try {
-            val text = String(data, Charsets.UTF_8)
-            text.contains("\"type\"") && text.contains("\"key-publish\"")
-        } catch (e: Exception) {
-            false
-        }
-    }
-
-    private fun parseMessagePayload(data: ByteArray): DecryptedContent {
-        val text = String(data, Charsets.UTF_8)
-
-        // Try to parse as JSON (for structured messages with reply context)
-        if (text.startsWith("{")) {
-            try {
-                // Simple JSON parsing without external dependency
-                if (text.contains("\"text\"")) {
-                    val textMatch = Regex("\"text\"\\s*:\\s*\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"").find(text)
-                    if (textMatch != null) {
-                        val msgText = textMatch.groupValues[1]
-                            .replace("\\n", "\n")
-                            .replace("\\t", "\t")
-                            .replace("\\\"", "\"")
-                            .replace("\\\\", "\\")
-
-                        var replyToId: String? = null
-                        var replyToPreview: String? = null
-
-                        if (text.contains("\"replyTo\"")) {
-                            val txidMatch = Regex("\"txid\"\\s*:\\s*\"([^\"]+)\"").find(text)
-                            val previewMatch = Regex("\"preview\"\\s*:\\s*\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"").find(text)
-
-                            replyToId = txidMatch?.groupValues?.get(1)
-                            replyToPreview = previewMatch?.groupValues?.get(1)
-                        }
-
-                        return DecryptedContent(msgText, replyToId, replyToPreview)
-                    }
-                }
-            } catch (e: Exception) {
-                // Fall through to plain text
-            }
-        }
-
-        return DecryptedContent(text)
-    }
 }

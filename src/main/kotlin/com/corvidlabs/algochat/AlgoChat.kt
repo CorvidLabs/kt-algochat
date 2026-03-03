@@ -163,21 +163,30 @@ class AlgoChatClient private constructor(
 
     /**
      * Decrypts a message from a sender.
+     *
+     * @return The decrypted text content.
      */
     fun decrypt(envelopeBytes: ByteArray, senderPublicKeyBytes: ByteArray): String {
+        return decryptFull(envelopeBytes).text
+    }
+
+    /**
+     * Decrypts a message and returns the full [DecryptedContent] including reply context.
+     *
+     * @return Decrypted content with text and optional reply metadata.
+     */
+    fun decryptFull(envelopeBytes: ByteArray): DecryptedContent {
         if (!isChatMessage(envelopeBytes)) {
             throw AlgoChatException.InvalidEnvelope("Not an AlgoChat message")
         }
 
         val envelope = ChatEnvelope.decode(envelopeBytes)
 
-        val decrypted = Crypto.decryptMessage(
+        return Crypto.decryptMessage(
             envelope,
             encryptionKeyPair.privateKey,
             encryptionKeyPair.publicKey
         ) ?: throw AlgoChatException.DecryptionFailed("Failed to decrypt message")
-
-        return decrypted.text
     }
 
     /**
@@ -210,8 +219,13 @@ class AlgoChatClient private constructor(
             }
         }
 
-        // Decrypt the message
-        val content = decrypt(tx.note, otherKey)
+        // Decrypt the message (full content including reply context)
+        val decrypted = decryptFull(tx.note)
+
+        // Build reply context from decrypted content
+        val replyContext = if (decrypted.replyToId != null) {
+            ReplyContext(decrypted.replyToId, decrypted.replyToPreview ?: "")
+        } else null
 
         // Create message
         val timestamp = Instant.ofEpochSecond(tx.roundTime)
@@ -220,11 +234,11 @@ class AlgoChatClient private constructor(
             id = tx.txid,
             sender = tx.sender,
             recipient = tx.receiver,
-            content = content,
+            content = decrypted.text,
             timestamp = timestamp,
             confirmedRound = tx.confirmedRound,
             direction = direction,
-            replyContext = null  // Reply context would be parsed from content
+            replyContext = replyContext
         )
 
         // Update conversation

@@ -54,7 +54,13 @@ data class Message(
     /** Message direction relative to the current user. */
     val direction: MessageDirection,
     /** Reply context if this message is a reply. */
-    val replyContext: ReplyContext? = null
+    val replyContext: ReplyContext? = null,
+    /** Payment amount in microAlgos (0 for minimum-fee messages). */
+    val amount: Long = 0,
+    /** Transaction fee in microAlgos. */
+    val fee: Long = 0,
+    /** Offset within the round for fine-grained ordering. */
+    val intraRoundOffset: Int = 0
 ) {
     /** Whether this message is a reply to another message. */
     val isReply: Boolean get() = replyContext != null
@@ -128,6 +134,42 @@ class Conversation(
     fun merge(newMessages: List<Message>) {
         newMessages.forEach { append(it) }
     }
+
+    /**
+     * Checks whether the conversation contains a message with the given ID.
+     */
+    fun hasMessage(id: String): Boolean = _messages.any { it.id == id }
+
+    /**
+     * Looks up a message by its transaction ID.
+     *
+     * @return The message, or null if not found.
+     */
+    fun getById(id: String): Message? = _messages.find { it.id == id }
+
+    /**
+     * Returns messages confirmed after the given round (exclusive).
+     */
+    fun messagesAfterRound(round: Long): List<Message> =
+        _messages.filter { it.confirmedRound > round }
+
+    /**
+     * Returns messages filtered by direction.
+     */
+    fun messagesInDirection(direction: MessageDirection): List<Message> =
+        _messages.filter { it.direction == direction }
+
+    /**
+     * Returns the highest confirmed round across all messages, or null if empty.
+     */
+    fun highestRound(): Long? = _messages.maxOfOrNull { it.confirmedRound }
+
+    /**
+     * Removes all messages from the conversation.
+     */
+    fun clear() {
+        _messages.clear()
+    }
 }
 
 /**
@@ -137,17 +179,34 @@ data class DiscoveredKey(
     /** The X25519 public key (32 bytes). */
     val publicKey: ByteArray,
     /** Whether the key was cryptographically verified via Ed25519 signature. */
-    val isVerified: Boolean
+    val isVerified: Boolean,
+    /** The Algorand address that published this key. */
+    val address: String? = null,
+    /** Transaction ID in which the key was discovered. */
+    val discoveredInTx: String? = null,
+    /** Round in which the key was discovered. */
+    val discoveredAtRound: Long? = null,
+    /** Timestamp when the key was discovered (from on-chain round time). */
+    val discoveredAt: Instant? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is DiscoveredKey) return false
-        return publicKey.contentEquals(other.publicKey) && isVerified == other.isVerified
+        return publicKey.contentEquals(other.publicKey) &&
+            isVerified == other.isVerified &&
+            address == other.address &&
+            discoveredInTx == other.discoveredInTx &&
+            discoveredAtRound == other.discoveredAtRound &&
+            discoveredAt == other.discoveredAt
     }
 
     override fun hashCode(): Int {
         var result = publicKey.contentHashCode()
         result = 31 * result + isVerified.hashCode()
+        result = 31 * result + (address?.hashCode() ?: 0)
+        result = 31 * result + (discoveredInTx?.hashCode() ?: 0)
+        result = 31 * result + (discoveredAtRound?.hashCode() ?: 0)
+        result = 31 * result + (discoveredAt?.hashCode() ?: 0)
         return result
     }
 }
@@ -165,7 +224,9 @@ data class SendOptions(
     /** Maximum seconds to wait for indexer. */
     val indexerTimeoutSecs: Int = 30,
     /** Reply context if replying to a message. */
-    val replyContext: ReplyContext? = null
+    val replyContext: ReplyContext? = null,
+    /** Custom payment amount in microAlgos (null uses the protocol minimum). */
+    val customAmount: Long? = null
 ) {
     companion object {
         /** Fire-and-forget (no waiting). */

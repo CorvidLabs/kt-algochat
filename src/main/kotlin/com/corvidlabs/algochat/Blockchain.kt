@@ -198,7 +198,14 @@ suspend fun discoverEncryptionKey(
 
         // Try to parse as key announcement
         val key = parseKeyAnnouncement(tx.note, address)
-        if (key != null) return key
+        if (key != null) {
+            return key.copy(
+                address = address,
+                discoveredInTx = tx.txid,
+                discoveredAtRound = tx.confirmedRound,
+                discoveredAt = java.time.Instant.ofEpochSecond(tx.roundTime)
+            )
+        }
     }
 
     return null
