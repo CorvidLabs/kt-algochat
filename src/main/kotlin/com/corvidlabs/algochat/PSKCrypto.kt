@@ -85,6 +85,36 @@ object PSKCrypto {
     }
 
     /**
+     * Encrypt a reply message using the PSK protocol.
+     *
+     * @param text Reply message text
+     * @param replyToTxid Transaction ID of the message being replied to
+     * @param replyToPreview Preview text of the original message (optional)
+     * @param senderPrivateKey Sender's X25519 private key
+     * @param senderPublicKey Sender's X25519 public key
+     * @param recipientPublicKey Recipient's X25519 public key
+     * @param currentPSK Current PSK from the ratchet (32 bytes)
+     * @param ratchetCounter Current ratchet counter value
+     * @return PSKEnvelope containing the encrypted reply
+     */
+    fun encryptReply(
+        text: String,
+        replyToTxid: String,
+        replyToPreview: String? = null,
+        senderPrivateKey: X25519PrivateKeyParameters,
+        senderPublicKey: X25519PublicKeyParameters,
+        recipientPublicKey: X25519PublicKeyParameters,
+        currentPSK: ByteArray,
+        ratchetCounter: UInt
+    ): PSKEnvelope {
+        val payload = String(
+            MessagePayloadCodec.encode(text, replyToTxid, replyToPreview),
+            Charsets.UTF_8
+        )
+        return encryptMessage(payload, senderPrivateKey, senderPublicKey, recipientPublicKey, currentPSK, ratchetCounter)
+    }
+
+    /**
      * Decrypt a PSK message from an envelope.
      *
      * @param envelope The encrypted PSK envelope
@@ -108,7 +138,11 @@ object PSKCrypto {
             decryptAsRecipient(envelope, myPrivateKey, myPubBytes, currentPSK)
         }
 
-        return parseMessagePayload(plaintext)
+        if (MessagePayloadCodec.isKeyPublish(plaintext)) {
+            return null
+        }
+
+        return MessagePayloadCodec.decode(plaintext)
     }
 
     private fun decryptAsRecipient(
@@ -173,41 +207,4 @@ object PSKCrypto {
         return output.copyOf(len)
     }
 
-    private fun parseMessagePayload(data: ByteArray): DecryptedContent {
-        val text = String(data, Charsets.UTF_8)
-
-        // Try to parse as JSON (for structured messages with reply context)
-        if (text.startsWith("{")) {
-            try {
-                // Simple JSON parsing without external dependency
-                if (text.contains("\"text\"")) {
-                    val textMatch = Regex("\"text\"\\s*:\\s*\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"").find(text)
-                    if (textMatch != null) {
-                        val msgText = textMatch.groupValues[1]
-                            .replace("\\n", "\n")
-                            .replace("\\t", "\t")
-                            .replace("\\\"", "\"")
-                            .replace("\\\\", "\\")
-
-                        var replyToId: String? = null
-                        var replyToPreview: String? = null
-
-                        if (text.contains("\"replyTo\"")) {
-                            val txidMatch = Regex("\"txid\"\\s*:\\s*\"([^\"]+)\"").find(text)
-                            val previewMatch = Regex("\"preview\"\\s*:\\s*\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"").find(text)
-
-                            replyToId = txidMatch?.groupValues?.get(1)
-                            replyToPreview = previewMatch?.groupValues?.get(1)
-                        }
-
-                        return DecryptedContent(msgText, replyToId, replyToPreview)
-                    }
-                }
-            } catch (e: Exception) {
-                // Fall through to plain text
-            }
-        }
-
-        return DecryptedContent(text)
-    }
 }
