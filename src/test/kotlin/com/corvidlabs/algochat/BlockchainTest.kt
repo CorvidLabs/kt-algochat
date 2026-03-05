@@ -3,6 +3,7 @@ package com.corvidlabs.algochat
 import kotlinx.coroutines.test.runTest
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import org.junit.jupiter.api.Test
+import java.security.MessageDigest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -98,6 +99,36 @@ class BlockchainTest {
 
         fun bytesToHex(bytes: ByteArray): String {
             return bytes.joinToString("") { "%02x".format(it) }
+        }
+
+        /** Compute an Algorand address from a 32-byte Ed25519 public key. */
+        fun algorandAddressFromPublicKey(publicKey: ByteArray): String {
+            require(publicKey.size == 32)
+            val digest = MessageDigest.getInstance("SHA-512/256")
+            val hash = digest.digest(publicKey)
+            val checksum = hash.copyOfRange(hash.size - 4, hash.size)
+            val addressBytes = publicKey + checksum
+            return base32Encode(addressBytes)
+        }
+
+        /** Base32 encode (RFC 4648, no padding). */
+        private fun base32Encode(data: ByteArray): String {
+            val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+            val sb = StringBuilder()
+            var buffer = 0
+            var bitsLeft = 0
+            for (b in data) {
+                buffer = (buffer shl 8) or (b.toInt() and 0xFF)
+                bitsLeft += 8
+                while (bitsLeft >= 5) {
+                    bitsLeft -= 5
+                    sb.append(alphabet[(buffer shr bitsLeft) and 0x1F])
+                }
+            }
+            if (bitsLeft > 0) {
+                sb.append(alphabet[(buffer shl (5 - bitsLeft)) and 0x1F])
+            }
+            return sb.toString()
         }
 
         /** Create a key announcement note (32-byte encryption key). */
@@ -264,9 +295,14 @@ class BlockchainTest {
     fun `discoverEncryptionKey finds signed and verified key announcement`() = runTest {
         val indexer = FakeIndexerClient()
 
-        // Derive a real Ed25519 key pair from seed (all zeros = TEST_ADDRESS)
+        // Derive a real Ed25519 key pair from seed
         val seed = ByteArray(32)
         val ed25519Private = Ed25519PrivateKeyParameters(seed, 0)
+        val ed25519Public = ed25519Private.generatePublicKey().encoded
+
+        // Compute the correct Algorand address from this Ed25519 public key
+        // Address = Base32(pubkey + checksum), where checksum = last 4 bytes of SHA-512/256(pubkey)
+        val address = algorandAddressFromPublicKey(ed25519Public)
 
         // Derive an encryption key
         val encryptionKeys = Keys.deriveKeysFromSeed(seed)
@@ -279,15 +315,15 @@ class BlockchainTest {
         indexer.addTransaction(
             NoteTransaction(
                 txid = "tx_signed",
-                sender = TEST_ADDRESS,
-                receiver = TEST_ADDRESS,
+                sender = address,
+                receiver = address,
                 note = signedNote,
                 confirmedRound = 200,
                 roundTime = 2000
             )
         )
 
-        val result = discoverEncryptionKey(indexer, TEST_ADDRESS)
+        val result = discoverEncryptionKey(indexer, address)
         assertNotNull(result)
         assertTrue(result.publicKey.contentEquals(encryptionPubBytes))
         assertTrue(result.isVerified)
