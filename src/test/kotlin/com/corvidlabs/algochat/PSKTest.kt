@@ -386,6 +386,65 @@ class PSKTest {
     }
 
     // ========================================================================
+    // PSK All Message Types Tests
+    // ========================================================================
+
+    @Test
+    fun `PSK all message types encrypt decrypt correctly`() {
+        val alice = aliceKeys()
+        val bob = bobKeys()
+        val psk = PSKRatchet.derivePSKAtCounter(TEST_PSK, 0u)
+
+        val testMessages = mapOf(
+            "empty" to "",
+            "single_char" to "X",
+            "whitespace" to "   \t\n   ",
+            "numbers" to "1234567890",
+            "punctuation" to "!@#\$%^&*()_+-=[]{}\\|;':\",./<>?",
+            "newlines" to "Line 1\nLine 2\nLine 3",
+            "emoji_simple" to "Hello 👋 World 🌍",
+            "emoji_zwj" to "Family: 👨‍👩‍👧‍👦",
+            "chinese" to "你好世界 - Hello World",
+            "arabic" to "مرحبا بالعالم",
+            "japanese" to "こんにちは世界 カタカナ 漢字",
+            "korean" to "안녕하세요 세계",
+            "accents" to "Café résumé naïve",
+            "cyrillic" to "Привет мир",
+            "json" to """{"key": "value", "num": 42}""",
+            "html" to """<div class="test">Content</div>""",
+            "url" to "https://example.com/path?q=test&lang=en",
+            "code" to """func hello() { print("Hi") }""",
+            "long_text" to "The quick brown fox jumps over the lazy dog. ".repeat(11),
+            "max_payload" to "A".repeat(PSKProtocol.MAX_PAYLOAD_SIZE)
+        )
+
+        for ((key, message) in testMessages) {
+            val envelope = PSKCrypto.encryptMessage(
+                message,
+                alice.privateKey,
+                alice.publicKey,
+                bob.publicKey,
+                psk,
+                0u
+            )
+
+            // Decrypt as recipient
+            val decryptedBob = PSKCrypto.decryptMessage(
+                envelope, bob.privateKey, bob.publicKey, psk
+            )
+            assertNotNull(decryptedBob, "PSK: Failed to decrypt $key as recipient")
+            assertEquals(message, decryptedBob.text, "PSK: Message mismatch for $key")
+
+            // Decrypt as sender (bidirectional)
+            val decryptedAlice = PSKCrypto.decryptMessage(
+                envelope, alice.privateKey, alice.publicKey, psk
+            )
+            assertNotNull(decryptedAlice, "PSK: Failed to decrypt $key as sender")
+            assertEquals(message, decryptedAlice.text, "PSK: Bidirectional mismatch for $key")
+        }
+    }
+
+    // ========================================================================
     // PSK State Counter Management Tests
     // ========================================================================
 
