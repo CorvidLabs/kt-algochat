@@ -14,7 +14,7 @@ Kotlin implementation of the AlgoChat protocol for encrypted messaging on Algora
 
 ```kotlin
 dependencies {
-    implementation("com.corvidlabs:algochat:0.1.0")
+    implementation("com.corvidlabs:algochat:0.2.0")
 }
 ```
 
@@ -22,7 +22,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.corvidlabs:algochat:0.1.0'
+    implementation 'com.corvidlabs:algochat:0.2.0'
 }
 ```
 
