@@ -28,14 +28,106 @@ dependencies {
 
 ## Usage
 
+### Client Initialization
+
 ```kotlin
 import com.corvidlabs.algochat.*
 
-// Derive keys from a 32-byte seed (e.g., from Algorand account)
+// Create a client from an Algorand account seed (32-byte Ed25519 private key)
+val client = AlgoChatClient.fromSeed(
+    seed = accountSeed,          // 32-byte seed
+    address = "ALGO_ADDRESS...", // Algorand address
+    config = AlgoChatConfig.testnet(),
+    algod = algodClient,
+    indexer = indexerClient
+)
+
+// Network presets: localnet(), testnet(), mainnet()
+// Custom config:
+val config = AlgoChatConfig(
+    network = AlgorandConfig(
+        algodUrl = "https://your-node.example.com",
+        algodToken = "your-token",
+        indexerUrl = "https://your-indexer.example.com",
+        indexerToken = "your-token"
+    ),
+    autoDiscoverKeys = true,
+    cachePublicKeys = true,
+    cacheMessages = true
+)
+```
+
+### Key Discovery
+
+```kotlin
+// Discover a recipient's encryption public key from on-chain announcements
+val discovered = client.discoverKey("RECIPIENT_ADDRESS...")
+if (discovered != null) {
+    println("Key verified: ${discovered.isVerified}")
+    // discovered.publicKey -> 32-byte X25519 public key
+}
+```
+
+### Encrypt and Decrypt
+
+```kotlin
+// Encrypt a message for a recipient
+val recipientKey = client.discoverKey("RECIPIENT_ADDRESS...")!!
+val encrypted = client.encrypt("Hello, World!", recipientKey.publicKey)
+
+// Decrypt a received message
+val plaintext = client.decrypt(encrypted, senderPublicKey)
+
+// Decrypt with full reply context
+val content = client.decryptFull(encrypted)
+println(content.text)
+println(content.replyToId)      // null if not a reply
+println(content.replyToPreview) // null if not a reply
+```
+
+### Replies
+
+```kotlin
+// Reply to a message using Crypto.encryptReply
+val replyEnvelope = Crypto.encryptReply(
+    text = "Thanks for the message!",
+    replyToTxid = originalMessage.id,
+    replyToPreview = "Hello, World!",
+    senderPrivateKey = senderKeys.privateKey,
+    senderPublicKey = senderKeys.publicKey,
+    recipientPublicKey = recipientKeys.publicKey
+)
+
+// The recipient decrypts and sees the reply context
+val decrypted = Crypto.decryptMessage(replyEnvelope, recipientKeys.privateKey, recipientKeys.publicKey)
+decrypted?.let {
+    println(it.text)           // "Thanks for the message!"
+    println(it.replyToId)      // original transaction ID
+    println(it.replyToPreview) // "Hello, World!"
+}
+```
+
+### Conversations and Sync
+
+```kotlin
+// Fetch new messages from the blockchain
+val messages = client.sync()
+
+// Access conversations
+val conv = client.conversation("RECIPIENT_ADDRESS...")
+println(conv.messages)       // all messages
+println(conv.lastMessage)    // most recent
+println(conv.lastReceived)   // most recent received
+println(conv.messageCount)   // total count
+```
+
+### Low-Level Crypto API
+
+```kotlin
+// Direct key derivation and encryption (without the client)
 val senderKeys = Keys.deriveKeysFromSeed(seed)
 val recipientKeys = Keys.deriveKeysFromSeed(recipientSeed)
 
-// Encrypt a message
 val envelope = Crypto.encryptMessage(
     "Hello, World!",
     senderKeys.privateKey,
@@ -43,13 +135,9 @@ val envelope = Crypto.encryptMessage(
     recipientKeys.publicKey
 )
 
-// Encode for transmission
 val encoded = envelope.encode()
-
-// Decode received message
 val decoded = ChatEnvelope.decode(encoded)
 
-// Decrypt as recipient
 val result = Crypto.decryptMessage(decoded, recipientKeys.privateKey, recipientKeys.publicKey)
 result?.let { println(it.text) }
 ```
@@ -125,6 +213,7 @@ This implementation is fully compatible with:
 - [ts-algochat](https://github.com/CorvidLabs/ts-algochat) (TypeScript)
 - [py-algochat](https://github.com/CorvidLabs/py-algochat) (Python)
 - [rs-algochat](https://github.com/CorvidLabs/rs-algochat) (Rust)
+- [go-algochat](https://github.com/CorvidLabs/go-algochat) (Go)
 
 ## License
 
