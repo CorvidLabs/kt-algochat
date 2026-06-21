@@ -179,6 +179,31 @@ class PublicKeyCacheTest {
     }
 
     @Test
+    fun `retrieveVerified preserves verification status`() = runTest {
+        val cache = PublicKeyCache()
+
+        cache.store(testAddress, testKey, verified = false)
+        val unverified = cache.retrieveVerified(testAddress)
+        assertNotNull(unverified)
+        assertFalse(unverified.verified)
+
+        cache.store(testAddress, testKey, verified = true)
+        val verified = cache.retrieveVerified(testAddress)
+        assertNotNull(verified)
+        assertTrue(verified.verified)
+    }
+
+    @Test
+    fun `retrieveVerified defaults to unverified`() = runTest {
+        val cache = PublicKeyCache()
+
+        cache.store(testAddress, testKey)
+        val cached = cache.retrieveVerified(testAddress)
+        assertNotNull(cached)
+        assertFalse(cached.verified)
+    }
+
+    @Test
     fun `retrieve returns null for expired key`() = runTest {
         val cache = PublicKeyCache(ttl = Duration.ofMillis(1))
 
@@ -332,5 +357,143 @@ class InMemoryKeyStorageTest {
 
         val retrieved2 = storage.retrieve("ALICE")
         assertEquals(0.toByte(), retrieved2[0])
+    }
+}
+
+// ============================================================================
+// FileKeyStorage Tests
+// ============================================================================
+
+class FileKeyStorageTest {
+
+    private val testKey = ByteArray(32) { it.toByte() }
+    private val passphrase = "correct horse battery staple".toCharArray()
+    private val address = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ"
+
+    private fun tempBase(): java.nio.file.Path {
+        return java.nio.file.Files.createTempDirectory("algochat-keys-test")
+    }
+
+    @Test
+    fun `store and retrieve round trip`() = runTest {
+        val base = tempBase()
+        val storage = FileKeyStorage(passphrase, base)
+
+        storage.store(testKey, address)
+        val retrieved = storage.retrieve(address)
+
+        assertTrue(testKey.contentEquals(retrieved))
+    }
+
+    @Test
+    fun `stored file is 92 bytes`() = runTest {
+        val base = tempBase()
+        val storage = FileKeyStorage(passphrase, base)
+
+        storage.store(testKey, address)
+
+        val keyFile = base.resolve("keys").resolve("$address.key")
+        assertTrue(java.nio.file.Files.exists(keyFile))
+        assertEquals(92L, java.nio.file.Files.size(keyFile))
+    }
+
+    @Test
+    fun `wrong passphrase fails to decrypt`() = runTest {
+        val base = tempBase()
+        val storage = FileKeyStorage(passphrase, base)
+        storage.store(testKey, address)
+
+        val wrongStorage = FileKeyStorage("wrong passphrase".toCharArray(), base)
+        assertThrows<AlgoChatException.DecryptionFailed> {
+            wrongStorage.retrieve(address)
+        }
+    }
+
+    @Test
+    fun `each store uses a fresh salt and nonce`() = runTest {
+        val base = tempBase()
+        val storage = FileKeyStorage(passphrase, base)
+
+        storage.store(testKey, address)
+        val blob1 = java.nio.file.Files.readAllBytes(base.resolve("keys").resolve("$address.key"))
+
+        storage.store(testKey, address)
+        val blob2 = java.nio.file.Files.readAllBytes(base.resolve("keys").resolve("$address.key"))
+
+        // Same plaintext, but different salt + nonce means a different ciphertext blob.
+        assertFalse(blob1.contentEquals(blob2))
+    }
+
+    @Test
+    fun `retrieve missing key throws KeyNotFound`() = runTest {
+        val base = tempBase()
+        val storage = FileKeyStorage(passphrase, base)
+
+        assertThrows<AlgoChatException.KeyNotFound> {
+            storage.retrieve(address)
+        }
+    }
+
+    @Test
+    fun `hasKey reflects stored state`() = runTest {
+        val base = tempBase()
+        val storage = FileKeyStorage(passphrase, base)
+
+        assertFalse(storage.hasKey(address))
+        storage.store(testKey, address)
+        assertTrue(storage.hasKey(address))
+    }
+
+    @Test
+    fun `delete removes the key`() = runTest {
+        val base = tempBase()
+        val storage = FileKeyStorage(passphrase, base)
+
+        storage.store(testKey, address)
+        storage.delete(address)
+
+        assertFalse(storage.hasKey(address))
+    }
+
+    @Test
+    fun `listStoredAddresses returns stored addresses`() = runTest {
+        val base = tempBase()
+        val storage = FileKeyStorage(passphrase, base)
+
+        assertTrue(storage.listStoredAddresses().isEmpty())
+
+        storage.store(testKey, address)
+        val listed = storage.listStoredAddresses()
+        assertEquals(1, listed.size)
+        assertEquals(address, listed[0])
+    }
+
+    @Test
+    fun `store rejects wrong key size`() = runTest {
+        val base = tempBase()
+        val storage = FileKeyStorage(passphrase, base)
+
+        assertThrows<IllegalArgumentException> {
+            storage.store(ByteArray(16), address)
+        }
+    }
+
+    @Test
+    fun `file permissions are owner only on posix`() = runTest {
+        val base = tempBase()
+        val storage = FileKeyStorage(passphrase, base)
+        storage.store(testKey, address)
+
+        val keyFile = base.resolve("keys").resolve("$address.key")
+        val view = java.nio.file.Files.getFileAttributeView(
+            keyFile,
+            java.nio.file.attribute.PosixFileAttributeView::class.java
+        )
+        // Skip on non-POSIX filesystems (e.g. Windows).
+        if (view != null) {
+            val perms = view.readAttributes().permissions()
+            val expected = java.nio.file.attribute.PosixFilePermissions.fromString("rw-------")
+            assertEquals(expected, perms)
+        }
     }
 }

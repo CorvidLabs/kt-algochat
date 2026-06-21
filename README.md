@@ -10,20 +10,55 @@ Kotlin implementation of the AlgoChat protocol for encrypted messaging on Algora
 
 ## Installation
 
+Releases are published to [GitHub Packages](https://github.com/CorvidLabs/kt-algochat/packages).
+GitHub Packages requires authentication even for public packages, so you must
+configure a GitHub username and a personal access token (with the `read:packages`
+scope) and reference the CorvidLabs Maven repository.
+
+Set the credentials as environment variables (or in `~/.gradle/gradle.properties`):
+
+```bash
+export GITHUB_ACTOR=your-github-username
+export GITHUB_TOKEN=your-personal-access-token
+```
+
 ### Gradle (Kotlin DSL)
 
-kotlin
+```kotlin
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://maven.pkg.github.com/CorvidLabs/kt-algochat")
+        credentials {
+            username = System.getenv("GITHUB_ACTOR")
+            password = System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+
 dependencies {
     implementation("com.corvidlabs:algochat:0.2.0")
 }
-
+```
 
 ### Gradle (Groovy)
 
-groovy
+```groovy
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://maven.pkg.github.com/CorvidLabs/kt-algochat")
+        credentials {
+            username = System.getenv("GITHUB_ACTOR")
+            password = System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+
 dependencies {
     implementation 'com.corvidlabs:algochat:0.2.0'
 }
+```
 
 
 ## Quick Start

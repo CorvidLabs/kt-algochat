@@ -111,6 +111,9 @@ class BlockchainTest {
             return base32Encode(addressBytes)
         }
 
+        /** Base32 encode (RFC 4648, no padding), accessible to test bodies. */
+        fun base32EncodePublic(data: ByteArray): String = base32Encode(data)
+
         /** Base32 encode (RFC 4648, no padding). */
         private fun base32Encode(data: ByteArray): String {
             val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
@@ -383,6 +386,44 @@ class BlockchainTest {
         assertNotNull(result)
         assertTrue(result.publicKey.contentEquals(key1))
         assertEquals("tx_first", result.discoveredInTx)
+    }
+
+    @Test
+    fun `discoverEncryptionKey rejects verification when address checksum is invalid`() = runTest {
+        val indexer = FakeIndexerClient()
+
+        // Derive a real Ed25519 key pair from seed.
+        val seed = ByteArray(32) { 0x09 }
+        val ed25519Private = Ed25519PrivateKeyParameters(seed, 0)
+        val ed25519Public = ed25519Private.generatePublicKey().encoded
+
+        // Build an address with the correct public key but a deliberately wrong checksum.
+        val badChecksum = ByteArray(4) { 0x00 }
+        val badAddressBytes = ed25519Public + badChecksum
+        val badAddress = base32EncodePublic(badAddressBytes)
+
+        val encryptionKeys = Keys.deriveKeysFromSeed(seed)
+        val encryptionPubBytes = Keys.publicKeyToBytes(encryptionKeys.publicKey)
+
+        // Sign correctly, but the address checksum is invalid, so decode must fail
+        // and the key must be reported as unverified rather than trusted.
+        val signedNote = makeSignedKeyAnnouncement(encryptionPubBytes, ed25519Private)
+
+        indexer.addTransaction(
+            NoteTransaction(
+                txid = "tx_bad_checksum",
+                sender = badAddress,
+                receiver = badAddress,
+                note = signedNote,
+                confirmedRound = 100,
+                roundTime = 1000
+            )
+        )
+
+        val result = discoverEncryptionKey(indexer, badAddress)
+        assertNotNull(result)
+        assertTrue(result.publicKey.contentEquals(encryptionPubBytes))
+        assertEquals(false, result.isVerified)
     }
 
     @Test

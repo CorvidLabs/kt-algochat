@@ -126,20 +126,25 @@ class AlgoChatClient private constructor(
      * Discovers the encryption public key for an address.
      */
     suspend fun discoverKey(address: String): DiscoveredKey? {
-        // Check cache first
+        // Check cache first. Preserve the verification status that was recorded
+        // when the key was originally discovered rather than assuming verified.
         if (config.cachePublicKeys) {
-            val cached = publicKeyCache.retrieve(address)
+            val cached = publicKeyCache.retrieveVerified(address)
             if (cached != null) {
-                return DiscoveredKey(publicKey = cached, isVerified = true)
+                return DiscoveredKey(
+                    publicKey = cached.key,
+                    isVerified = cached.verified,
+                    address = address
+                )
             }
         }
 
         // Search indexer for key announcement
         val key = discoverEncryptionKey(indexer, address)
 
-        // Cache if found
+        // Cache if found, recording its verification status
         if (key != null && config.cachePublicKeys) {
-            publicKeyCache.store(address, key.publicKey)
+            publicKeyCache.store(address, key.publicKey, key.isVerified)
         }
 
         return key
@@ -205,7 +210,9 @@ class AlgoChatClient private constructor(
             else -> return null  // Not relevant to us
         }
 
-        // Get the other party's address and key
+        // Get the other party's address and key. For received messages the
+        // sender's announced key must be cryptographically verified, otherwise a
+        // key substitution attack could trick us into trusting an attacker key.
         val (otherAddress, otherKey) = when (direction) {
             MessageDirection.SENT -> {
                 val key = discoverKey(tx.receiver)
@@ -215,6 +222,9 @@ class AlgoChatClient private constructor(
             MessageDirection.RECEIVED -> {
                 val key = discoverKey(tx.sender)
                     ?: throw AlgoChatException.PublicKeyNotFound(tx.sender)
+                if (!key.isVerified) {
+                    throw AlgoChatException.UnverifiedKey(tx.sender)
+                }
                 tx.sender to key.publicKey
             }
         }

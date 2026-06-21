@@ -87,6 +87,10 @@ sealed class AlgoChatException(message: String, cause: Throwable? = null) : Exce
     /** Public key not found for address. */
     class PublicKeyNotFound(address: String) : AlgoChatException("Public key not found for address: $address")
 
+    /** Public key was found but could not be cryptographically verified. */
+    class UnverifiedKey(address: String) :
+        AlgoChatException("Public key for address could not be verified: $address")
+
     /** Invalid recipient address. */
     class InvalidRecipient(details: String) : AlgoChatException("Invalid recipient: $details")
 
