@@ -523,6 +523,93 @@ class PSKTest {
     }
 
     @Test
+    fun `PSK state accepts counters far ahead`() = runTest {
+        val state = PSKState(TEST_PSK, "test-peer")
+
+        // No upper bound: a counter arbitrarily far ahead advances the window.
+        assertTrue(state.acceptReceiveCounter(0u))
+        assertTrue(state.acceptReceiveCounter(10_000u))
+        assertEquals(10_001u, state.receiveCounter)
+    }
+
+    @Test
+    fun `PSK receive decrypts and records counter`() = runTest {
+        val alice = aliceKeys()
+        val bob = bobKeys()
+        val counter = 3u
+        val psk = PSKRatchet.derivePSKAtCounter(TEST_PSK, counter)
+        val message = "Replay-protected message"
+
+        val envelope = PSKCrypto.encryptMessage(
+            message, alice.privateKey, alice.publicKey, bob.publicKey, psk, counter
+        )
+
+        val bobState = PSKState(TEST_PSK, "alice")
+        val decrypted = bobState.receive(envelope.ratchetCounter) {
+            PSKCrypto.decryptMessage(envelope, bob.privateKey, bob.publicKey, psk)
+        }
+
+        assertNotNull(decrypted)
+        assertEquals(message, decrypted.text)
+        // Counter recorded after success.
+        assertFalse(bobState.acceptReceiveCounter(counter))
+    }
+
+    @Test
+    fun `PSK receive rejects replayed envelope`() = runTest {
+        val alice = aliceKeys()
+        val bob = bobKeys()
+        val counter = 7u
+        val psk = PSKRatchet.derivePSKAtCounter(TEST_PSK, counter)
+
+        val envelope = PSKCrypto.encryptMessage(
+            "Once only", alice.privateKey, alice.publicKey, bob.publicKey, psk, counter
+        )
+
+        val bobState = PSKState(TEST_PSK, "alice")
+
+        // First receive succeeds.
+        bobState.receive(envelope.ratchetCounter) {
+            PSKCrypto.decryptMessage(envelope, bob.privateKey, bob.publicKey, psk)
+        }
+
+        // Replay of the same envelope/counter is rejected before decryption.
+        assertThrows<AlgoChatException.DecryptionFailed> {
+            bobState.receive(envelope.ratchetCounter) {
+                PSKCrypto.decryptMessage(envelope, bob.privateKey, bob.publicKey, psk)
+            }
+        }
+    }
+
+    @Test
+    fun `PSK receive does not consume counter on decryption failure`() = runTest {
+        val alice = aliceKeys()
+        val bob = bobKeys()
+        val counter = 4u
+        val correctPSK = PSKRatchet.derivePSKAtCounter(TEST_PSK, counter)
+        val wrongPSK = PSKRatchet.derivePSKAtCounter(TEST_PSK, counter + 1u)
+
+        val envelope = PSKCrypto.encryptMessage(
+            "Secret", alice.privateKey, alice.publicKey, bob.publicKey, correctPSK, counter
+        )
+
+        val bobState = PSKState(TEST_PSK, "alice")
+
+        // Decryption fails with the wrong PSK; the counter must not be consumed.
+        assertThrows<Exception> {
+            bobState.receive(envelope.ratchetCounter) {
+                PSKCrypto.decryptMessage(envelope, bob.privateKey, bob.publicKey, wrongPSK)
+            }
+        }
+
+        // Counter is still available, so a valid receive at the same counter works.
+        val decrypted = bobState.receive(envelope.ratchetCounter) {
+            PSKCrypto.decryptMessage(envelope, bob.privateKey, bob.publicKey, correctPSK)
+        }
+        assertNotNull(decrypted)
+    }
+
+    @Test
     fun `PSK state derives correct PSK at counter`() {
         val state = PSKState(TEST_PSK, "test-peer")
 

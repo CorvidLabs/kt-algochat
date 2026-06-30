@@ -1,8 +1,10 @@
 package com.corvidlabs.algochat
 
 import kotlinx.coroutines.test.runTest
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.security.MessageDigest
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -14,6 +16,33 @@ class AlgoChatClientTest {
         val BOB_SEED = ByteArray(32) { 0x02 }
         const val ALICE_ADDRESS = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ"
         const val BOB_ADDRESS = "7777777777777777777777777777777777777777777777777774MSJUVU"
+
+        /** Compute an Algorand address from a 32-byte Ed25519 public key. */
+        fun algorandAddressFromPublicKey(publicKey: ByteArray): String {
+            require(publicKey.size == 32)
+            val hash = MessageDigest.getInstance("SHA-512/256").digest(publicKey)
+            val checksum = hash.copyOfRange(hash.size - 4, hash.size)
+            return base32Encode(publicKey + checksum)
+        }
+
+        private fun base32Encode(data: ByteArray): String {
+            val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+            val sb = StringBuilder()
+            var buffer = 0
+            var bitsLeft = 0
+            for (b in data) {
+                buffer = (buffer shl 8) or (b.toInt() and 0xFF)
+                bitsLeft += 8
+                while (bitsLeft >= 5) {
+                    bitsLeft -= 5
+                    sb.append(alphabet[(buffer shr bitsLeft) and 0x1F])
+                }
+            }
+            if (bitsLeft > 0) {
+                sb.append(alphabet[(buffer shl (5 - bitsLeft)) and 0x1F])
+            }
+            return sb.toString()
+        }
 
         fun createClient(
             seed: ByteArray = ALICE_SEED,
@@ -254,16 +283,21 @@ class AlgoChatClientTest {
 
     @Test
     fun `processTransaction decrypts received message and creates conversation`() = runTest {
-        // Set up Bob's key in the indexer so Alice can discover it
+        // Received messages require a cryptographically verified sender key, so
+        // Bob announces a key signed by the Ed25519 key matching his address.
         val bobKeys = Keys.deriveKeysFromSeed(BOB_SEED)
         val bobPubBytes = Keys.publicKeyToBytes(bobKeys.publicKey)
+        val bobEd25519 = Ed25519PrivateKeyParameters(BOB_SEED, 0)
+        val bobRealAddress = algorandAddressFromPublicKey(bobEd25519.generatePublicKey().encoded)
+        val bobSignedNote = bobPubBytes + Signature.signEncryptionKey(bobPubBytes, bobEd25519)
+
         val indexer = FakeIndexerClient()
         indexer.addTransaction(
             NoteTransaction(
                 txid = "bob_key_announce",
-                sender = BOB_ADDRESS,
-                receiver = BOB_ADDRESS,
-                note = bobPubBytes, // Key announcement
+                sender = bobRealAddress,
+                receiver = bobRealAddress,
+                note = bobSignedNote, // Signed key announcement (verifiable)
                 confirmedRound = 50,
                 roundTime = 500
             )
@@ -288,7 +322,7 @@ class AlgoChatClientTest {
 
         val tx = NoteTransaction(
             txid = "tx_msg",
-            sender = BOB_ADDRESS,
+            sender = bobRealAddress,
             receiver = ALICE_ADDRESS,
             note = envelope.encode(),
             confirmedRound = 100,
@@ -298,7 +332,7 @@ class AlgoChatClientTest {
         val msg = alice.processTransaction(tx)
         assertNotNull(msg)
         assertEquals("Hello Alice!", msg.content)
-        assertEquals(BOB_ADDRESS, msg.sender)
+        assertEquals(bobRealAddress, msg.sender)
         assertEquals(ALICE_ADDRESS, msg.recipient)
         assertEquals(MessageDirection.RECEIVED, msg.direction)
         assertEquals("tx_msg", msg.id)
@@ -307,8 +341,56 @@ class AlgoChatClientTest {
         // Conversation was auto-created
         val conversations = alice.conversations()
         assertEquals(1, conversations.size)
-        assertEquals(BOB_ADDRESS, conversations[0].participant)
+        assertEquals(bobRealAddress, conversations[0].participant)
         assertEquals(1, conversations[0].messageCount)
+    }
+
+    @Test
+    fun `processTransaction rejects received message with unverified sender key`() = runTest {
+        // Bob announces an UNSIGNED key. Received messages must be rejected because
+        // the sender key cannot be verified (key substitution defense).
+        val bobKeys = Keys.deriveKeysFromSeed(BOB_SEED)
+        val bobPubBytes = Keys.publicKeyToBytes(bobKeys.publicKey)
+        val indexer = FakeIndexerClient()
+        indexer.addTransaction(
+            NoteTransaction(
+                txid = "bob_key_announce",
+                sender = BOB_ADDRESS,
+                receiver = BOB_ADDRESS,
+                note = bobPubBytes, // Unsigned key announcement
+                confirmedRound = 50,
+                roundTime = 500
+            )
+        )
+
+        val alice = AlgoChatClient.fromSeed(
+            seed = ALICE_SEED,
+            address = ALICE_ADDRESS,
+            config = AlgoChatConfig.localnet(),
+            algod = FakeAlgodClient(),
+            indexer = indexer
+        )
+
+        val alicePubBytes = alice.encryptionPublicKey
+        val envelope = Crypto.encryptMessage(
+            "Hello Alice!",
+            bobKeys.privateKey,
+            bobKeys.publicKey,
+            Keys.publicKeyFromBytes(alicePubBytes)
+        )
+
+        val tx = NoteTransaction(
+            txid = "tx_msg",
+            sender = BOB_ADDRESS,
+            receiver = ALICE_ADDRESS,
+            note = envelope.encode(),
+            confirmedRound = 100,
+            roundTime = 1000
+        )
+
+        assertThrows<AlgoChatException.UnverifiedKey> {
+            alice.processTransaction(tx)
+        }
     }
 
     @Test

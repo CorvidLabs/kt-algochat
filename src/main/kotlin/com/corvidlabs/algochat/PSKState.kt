@@ -49,45 +49,94 @@ class PSKState(
      *
      * The counter is accepted if:
      * - It has not been seen before (replay protection)
-     * - It is within the acceptable window of the current receive counter
+     * - It is not more than [PSKProtocol.COUNTER_WINDOW] behind the highest
+     *   accepted counter
+     *
+     * Per the protocol specification there is no upper bound: counters arbitrarily
+     * far ahead are accepted (they advance the window), and only counters too far
+     * behind the peer's last counter are rejected.
      *
      * @param counter The received counter value
      * @return True if the counter is valid and was accepted
      */
     suspend fun acceptReceiveCounter(counter: UInt): Boolean {
         mutex.withLock {
-            // Check for replay
-            if (counter in _receivedCounters) {
+            if (!isCounterAcceptable(counter)) {
                 return false
             }
-
-            // Check window bounds
-            val windowStart = if (_receiveCounter >= PSKProtocol.COUNTER_WINDOW.toUInt()) {
-                _receiveCounter - PSKProtocol.COUNTER_WINDOW.toUInt()
-            } else {
-                0u
-            }
-
-            // Upper bound: allow up to COUNTER_WINDOW ahead of current
-            val windowEnd = _receiveCounter + PSKProtocol.COUNTER_WINDOW.toUInt()
-
-            if (counter < windowStart || counter > windowEnd) {
-                return false
-            }
-
-            // Accept the counter
-            _receivedCounters.add(counter)
-
-            // Advance receive counter if needed
-            if (counter >= _receiveCounter) {
-                _receiveCounter = counter + 1u
-            }
-
-            // Prune old counters outside the window
-            pruneReceivedCounters()
-
+            recordCounter(counter)
             return true
         }
+    }
+
+    /**
+     * Validates a received counter, runs the decrypt action, then records the
+     * counter only if decryption succeeds.
+     *
+     * This is the secure receive path: it enforces replay protection (a counter is
+     * never accepted twice) and the sliding window before decryption is attempted,
+     * and it does not consume a counter for messages that fail to decrypt or are
+     * rejected as replays. This prevents an attacker from exhausting counter slots
+     * or replaying captured ciphertext.
+     *
+     * @param counter The ratchet counter from the received envelope
+     * @param decrypt A block that performs decryption and returns the result; it
+     *   should throw if decryption fails
+     * @return The decryption result
+     * @throws AlgoChatException.DecryptionFailed if the counter is a replay or
+     *   outside the acceptable window
+     */
+    suspend fun <Output> receive(counter: UInt, decrypt: suspend () -> Output): Output {
+        mutex.withLock {
+            if (!isCounterAcceptable(counter)) {
+                throw AlgoChatException.DecryptionFailed(
+                    "Rejected PSK counter $counter for peer $peerId (replay or outside window)"
+                )
+            }
+
+            val result = decrypt()
+
+            // Record only after a successful decryption.
+            recordCounter(counter)
+            return result
+        }
+    }
+
+    /**
+     * Checks whether a counter would be accepted without mutating any state.
+     *
+     * @param counter The counter to test
+     * @return True if the counter is neither a replay nor too far behind the window
+     */
+    private fun isCounterAcceptable(counter: UInt): Boolean {
+        if (counter in _receivedCounters) {
+            return false
+        }
+
+        // Reject counters that are too far behind the highest accepted counter.
+        val windowStart = if (_receiveCounter >= PSKProtocol.COUNTER_WINDOW.toUInt()) {
+            _receiveCounter - PSKProtocol.COUNTER_WINDOW.toUInt()
+        } else {
+            0u
+        }
+
+        return counter >= windowStart
+    }
+
+    /**
+     * Records an accepted counter and advances window state. Caller must hold the
+     * mutex and have already validated the counter with [isCounterAcceptable].
+     */
+    private fun recordCounter(counter: UInt) {
+        _receivedCounters.add(counter)
+
+        // Advance receive counter if needed
+        if (counter >= _receiveCounter) {
+            _receiveCounter = counter + 1u
+        }
+
+        // Prune old counters outside the window
+        pruneReceivedCounters()
     }
 
     /**

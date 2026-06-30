@@ -216,17 +216,31 @@ suspend fun discoverEncryptionKey(
  *
  * Algorand addresses are Base32-encoded (RFC 4648, no padding). The decoded
  * bytes consist of 32 bytes of Ed25519 public key followed by a 4-byte checksum.
+ * The checksum is the last 4 bytes of SHA-512/256 over the public key. This
+ * function rejects addresses whose checksum does not match.
  *
  * @param address The Algorand address string (58 characters, Base32 no padding)
  * @return The 32-byte Ed25519 public key
- * @throws IllegalArgumentException if the address is invalid
+ * @throws IllegalArgumentException if the address is invalid or the checksum mismatches
  */
 private fun decodeAlgorandAddress(address: String): ByteArray {
     val decoded = base32Decode(address)
     require(decoded.size == 36) {
         "Decoded Algorand address must be 36 bytes (32 key + 4 checksum), got ${decoded.size}"
     }
-    return decoded.copyOfRange(0, 32)
+
+    val publicKey = decoded.copyOfRange(0, 32)
+    val checksum = decoded.copyOfRange(32, 36)
+
+    val digest = java.security.MessageDigest.getInstance("SHA-512/256")
+    val hash = digest.digest(publicKey)
+    val expectedChecksum = hash.copyOfRange(hash.size - 4, hash.size)
+
+    require(checksum.contentEquals(expectedChecksum)) {
+        "Algorand address checksum mismatch"
+    }
+
+    return publicKey
 }
 
 /**
