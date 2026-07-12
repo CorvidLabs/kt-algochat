@@ -27,3 +27,7 @@ steps = ["lint", "test", "build"]
 [lanes.pre-commit]
 description = "Fast gate before committing"
 steps = ["lint", "test"]
+
+[lanes.verify]
+description = "Run the native Kotlin test, build, and package checks"
+steps = ["test", "build", "jar"]
