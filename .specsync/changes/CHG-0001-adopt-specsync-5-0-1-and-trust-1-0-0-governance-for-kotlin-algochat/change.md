@@ -1,6 +1,6 @@
 ---
 id: CHG-0001-adopt-specsync-5-0-1-and-trust-1-0-0-governance-for-kotlin-algochat
-state: draft
+state: implementing
 type: migration
 base_commit: e6fb18432225080fcc5530ba9dade452cae1457a
 ---
@@ -17,9 +17,7 @@ Adopt SpecSync 5.0.1 and Trust 1.0.0 governance for Kotlin AlgoChat
 
 ## Acceptance Criteria
 
-- SpecSync advisory coverage passes; all four agent integrations are installed; Trust doctor passes; Kotlin tests
-- Gradle build
-- and JAR packaging pass on JDK 17; the existing JDK 17 and 21 hosted matrix remains green.
+- SpecSync advisory coverage passes; all four agent integrations are installed; Trust doctor passes; Kotlin tests, Gradle build, and JAR packaging pass on JDK 17; the existing JDK 17 and 21 hosted matrix remains green.
 
 ## No-spec Rationale
 

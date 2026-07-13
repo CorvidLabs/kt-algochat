@@ -5,10 +5,10 @@
   "title": "Adopt SpecSync 5.0.1 and Trust 1.0.0 governance for Kotlin AlgoChat",
   "description": "Adopt SpecSync 5.0.1 and Trust 1.0.0 governance for Kotlin AlgoChat",
   "kind": "migration",
-  "state": "draft",
+  "state": "implementing",
   "base_commit": "e6fb18432225080fcc5530ba9dade452cae1457a",
   "created_at": 1783884104,
-  "updated_at": 1783884117,
+  "updated_at": 1783958479,
   "affected_specs": [],
   "affected_paths": [
     ".github/",

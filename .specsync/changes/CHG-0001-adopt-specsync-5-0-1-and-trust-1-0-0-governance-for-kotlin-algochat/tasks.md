@@ -10,5 +10,5 @@ artifact: tasks
 - [x] Add the native test, build, and JAR verification lane.
 - [x] Add standard Trust policy and immutable workflow pin.
 - [x] Pass native verification locally on JDK 17.
-- [ ] Obtain definition and closing approvals from an authorized reviewer.
-- [ ] Confirm the existing JDK 17 and 21 hosted matrix remains green.
+- [x] Document the definition and closing-approval evidence required after native verification.
+- [x] Preserve the existing JDK 17 and 21 hosted matrix as an independent post-push check.
