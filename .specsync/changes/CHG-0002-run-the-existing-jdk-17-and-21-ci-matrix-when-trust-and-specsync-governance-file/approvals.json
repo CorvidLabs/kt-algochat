@@ -1,0 +1,11 @@
+{
+  "approvals": [
+    {
+      "gate": "definition",
+      "actor": "user:0xLeif",
+      "timestamp": 1783959351,
+      "digest": "05be97b10f48da78a1b99c4ab6af41a42ae0e27869451e62845f3376fc0c0e9b",
+      "note": "Definition approval for the reviewed CI-trigger correction: governance changes must run the existing JDK 17/21 matrix without altering its jobs, setup, tests, or artifacts."
+    }
+  ]
+}
