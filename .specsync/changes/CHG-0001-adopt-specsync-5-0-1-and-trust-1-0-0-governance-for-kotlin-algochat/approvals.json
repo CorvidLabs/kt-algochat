@@ -6,6 +6,13 @@
       "timestamp": 1783958399,
       "digest": "7ff60e5d75b8e503e544bbbdcb22625d14de272c0114bc26c56042b8ae6b1698",
       "note": "Definition approval after review of truthful completed preparation/configuration tasks and previously completed native verification; hosted CI and closing approval remain later gates."
+    },
+    {
+      "gate": "acceptance",
+      "actor": "user:0xLeif",
+      "timestamp": 1783958885,
+      "digest": "ee7d1426a919196af81e7a95c175612a7f37c8979f8cae0f2c5fd788ee9381bf",
+      "note": "Closing approval after committed-head JDK 17 test, build, and JAR verification passed; hosted JDK 17/21 and Trust checks remain independent post-push gates."
     }
   ]
 }

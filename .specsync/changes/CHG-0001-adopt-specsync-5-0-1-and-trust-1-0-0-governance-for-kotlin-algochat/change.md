@@ -1,6 +1,6 @@
 ---
 id: CHG-0001-adopt-specsync-5-0-1-and-trust-1-0-0-governance-for-kotlin-algochat
-state: implementing
+state: accepted
 type: migration
 base_commit: e6fb18432225080fcc5530ba9dade452cae1457a
 ---
