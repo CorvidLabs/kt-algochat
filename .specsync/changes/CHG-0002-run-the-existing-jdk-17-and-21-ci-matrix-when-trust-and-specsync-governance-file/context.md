@@ -5,7 +5,10 @@ artifact: context
 
 # Context
 
-The existing CI workflow preserves a JDK 17 and JDK 21 test matrix but limits
-pull-request and push triggers to Kotlin source and build files. The rollout
-changes only governance files, so the native matrix does not run on its head.
-Governance paths must trigger the existing matrix without changing its jobs.
+The initial governance migration was intentionally advisory and recorded no
+canonical behavior. Kotlin AlgoChat already has a substantial tested API: a
+client and storage layer, a versioned encrypted envelope protocol, a ratcheted
+PSK extension, and fixtures consumed by sibling implementations. Those stable
+contracts now need accurate canonical descriptions and complete production-file
+coverage. The existing CI workflow also limits triggers to Kotlin source and
+build files, so governance changes must be included without changing its jobs.

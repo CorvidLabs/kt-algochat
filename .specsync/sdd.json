@@ -27,10 +27,7 @@
     ".specsync/config.json",
     ".specsync/version"
   ],
-  "ignored_paths": [
-    ".specsync/",
-    "specs/"
-  ],
+  "ignored_paths": [],
   "verification_commands": [
     "fledge lanes run verify"
   ],
