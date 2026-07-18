@@ -6,9 +6,10 @@
   "description": "Canonically specify the existing Kotlin client, encrypted protocol, PSK extension, and cross-language vectors with 100 percent source coverage, while ensuring governance changes run the native JDK matrix.",
   "kind": "feature",
   "state": "accepted",
+  "canonical_applied": true,
   "base_commit": "ccac4ab302937e85e57a3ef2fade003fa936d3ba",
   "created_at": 1783959304,
-  "updated_at": 1784012603,
+  "updated_at": 1784412576,
   "affected_specs": [
     "client",
     "protocol",

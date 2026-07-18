@@ -1,9 +1,634 @@
 {
-  "timestamp": 1784012594,
-  "commit": "5762cf53ab8e788b89d11494c17b40c508890e7f",
+  "timestamp": 1784412537,
+  "commit": "6e1fcaaa63fffd6e5a602c896c242ef56fecdb87",
   "contract_digest": "ee3ac9c64331cf022bd1c36fafa6cebed6f70a9c9f8a30410ec06b1d702bdf36",
-  "workspace_digest": "45c4a008d0302230c573a9053ce9e8cd5c9cbd34703640a488c5a439301fb2d0",
-  "acceptance_input_digest": "c5ce1da46b65abc8470a33f4569366be7a9d53882d9576c1d3c44f2163ac8ea4",
+  "workspace_digest": "6e389d92190c765dc482005d8bfe9cd2af8d3db7fa9f087c3ad24b6ce48b01cd",
+  "acceptance_input_digest": "7f183df5b0dcfc28cb9fdab68f66faf96d4894e8aae7ce58a60b11d3d4aa8dd5",
+  "acceptance_manifest": {
+    "schema_version": 1,
+    "entries": [
+      {
+        "path": ".attest.json",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "2581fe52873327db0bbac357a5102a0dbb18a1eea5a690b7b75eaa571e50cf65",
+        "entry_digest": "2904a18e18582f191a1d359d16e7bc61a7596ac77f62e55a94de56b3da8c796e",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": ".augur.toml",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "17f6ad5b84b4db012f0e3f398a96a478c1324fd47e72e1dd2a13c7cf9a432983",
+        "entry_digest": "bac13c952da05292bdd0af5849aad9d9def3ae5afc830fa42b6914b2fd874beb",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": ".github/workflows/ci.yml",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "35525ff73874006336c10978ab8a39245385bb710b6bf7d557ea5176024a4a2b",
+        "entry_digest": "e54e614457d5bf87a84c431148eaaee272bedc24c172d679f90ebed10e18e579",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": ".github/workflows/release.yml",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "7e85811b028b8f609671f3b15581f5e746cef019f65e6d1b5b7dccbae07087a5",
+        "entry_digest": "a9c60c74bcd0303c62eaa474e962015162f6f554177c6becd931bc22bf6d040b",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": ".github/workflows/trust.yml",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "bb4d950caafaee5fd9c37a73b9fda1e6fd4d1a0dcafa4677d9ff82c6bc31b637",
+        "entry_digest": "f29d8beb02f6d2048a5e022b9a9f4d37a4f9f2dd4770d41e436ed45b887a5b07",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": ".specsync/.gitignore",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "a505253bd2fdfb84f8121e89e48bbc67144082b5a88f439ee6acfb45424799b0",
+        "entry_digest": "ec3b8bd021ac6ac36ddfba3d0d6b84535be8074b917e9bffa050216e422d1792",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": ".specsync/adoption-report.json",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "34fde0f7d53ff881873e774269d236f0b2ab0f66a1e2155b60d6916a3e57d663",
+        "entry_digest": "ff0212c673f272cd52ec1f94c7d7952634129253f8f528dac3ac8f550116131e",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": ".specsync/config.toml",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "2d661805eacb2d9cfd1868d8b27788b431405a2d06a57a57ccb14899e713981f",
+        "entry_digest": "94da49480935b11e5b08da46bccfd888b52ae3531f1ff3ace426bbab40317213",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": ".specsync/registry.toml",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "302fe04fe091388cb811e9cf9b198e971b1ef7f6d9bd8440a206d151e25f2cdd",
+        "entry_digest": "a0abb5eead5ccd78b0f42963d14f1c47ce4d5de6b53f65ccddb385d4a42f4995",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": ".specsync/sdd.json",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "3f84526a122698007f55b5c7d338f23e8fcd19bf89ad20579950a4acb130e17e",
+        "entry_digest": "cc7f039803e1b11645c4cae25a6864d35e2cff358ecfa06725180718ce92127d",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": ".specsync/version",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "23b6867924dfeb9cf532753438dc919669bf93ad88215e11c15630a4acbf4299",
+        "entry_digest": "339b5f88be30302336707baa5dab61fd4b324d04e495d3bb772cf893fb4f73bc",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": ".trust.toml",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "21dbd4c5a7eb534a0acd6a021f5f6445c29d4decbc9e455df3d57e0a9e797c4a",
+        "entry_digest": "52c6aa1ebb4e1f0787a512f923672fe54d94bca1bc762ae0e514662f3602f504",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": "AGENTS.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "d2561f21b1519604865b1ae0c4a6586f5f2bea591c9b3b7d8c4ae0f274b73df5",
+        "entry_digest": "616b86acb3d91a5f9880826f4063978e95d46397de849b7566f3688823302e01",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": "fledge.toml",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "9500b32e833ba05212c28460a3da9b5c43375e939f5a8d5def307b010b2dc8dc",
+        "entry_digest": "55b8ee6f0c379de979a4bcf049c750c97bcc10412029d94c5e99e0a811d82daf",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": "specs/client/client.spec.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "cbb866616c026d96a4b6d77332c81a0c142415b01fe63a2af85b84779ca61eb4",
+        "entry_digest": "3193fdead4aeeb3b61bccb242559638d1144a93717869c0cd50031c41554ff47",
+        "owners": [
+          "client"
+        ]
+      },
+      {
+        "path": "specs/client/context.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "423785cf2fa72f573324cc662cfd42a130e2d49f73c23f5ee57b4dc05b197725",
+        "entry_digest": "951ff6cd0af8cbe3351fc7cbe5346f2abc20ee2c8f3ea2999c5dd4725486ab52",
+        "owners": [
+          "client"
+        ]
+      },
+      {
+        "path": "specs/client/requirements.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "067667705a4019139010f6b796a4e9dcc5d51073f8e5a009ae620177e2f259a6",
+        "entry_digest": "8c01bae7b581dc39a584c5056456978be784a7a6a6246f52eed4db1d46ece9bf",
+        "owners": [
+          "client"
+        ]
+      },
+      {
+        "path": "specs/client/tasks.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "a70f975fe23928a6fa3576b614a870be9ad519eb7be93b40d45abf19d4d33914",
+        "entry_digest": "a3a0f27bf589a0387632f905c8b139e5b5bb0296bd8b8afcf6202aa7a410b5d3",
+        "owners": [
+          "client"
+        ]
+      },
+      {
+        "path": "specs/client/testing.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "ae0295856f4626c5c79448f1cd36bf9c0d24709068506e49dc32b91313a21f2e",
+        "entry_digest": "07d62fa1a62e8bab0712eb1e89cc43dfa092b430cf2c0affa37734a4454cea20",
+        "owners": [
+          "client"
+        ]
+      },
+      {
+        "path": "specs/cross-vectors/context.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "a425d31f5c40cfb883823bc518c21dc68f3c7a1ff09f26dd188187691d92f46b",
+        "entry_digest": "109861bc7e9b621990b10244da15c8c7bc476a473fecb529e84ae4fe856f23df",
+        "owners": [
+          "cross-vectors"
+        ]
+      },
+      {
+        "path": "specs/cross-vectors/cross-vectors.spec.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "851174205cc01f8823d48427e64f60337a33dd782331889441c2e81bc6d8cbc9",
+        "entry_digest": "29363c6f05d3fee0917951ee45348009143867e7536423e0f919d04a89084c50",
+        "owners": [
+          "cross-vectors"
+        ]
+      },
+      {
+        "path": "specs/cross-vectors/requirements.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "ebe998094897464af1b6f6978e93ae65271295a683369ee67e6acd5a71e80a8d",
+        "entry_digest": "716700cf480016efaebcb3f82811d3705d15571b5920f73bf705bcbc0caf9e2d",
+        "owners": [
+          "cross-vectors"
+        ]
+      },
+      {
+        "path": "specs/cross-vectors/tasks.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "577066135cdd423ed5a33cdd1e7d97f9792f38b6e7e1408a1289adc0f41e8d89",
+        "entry_digest": "1d869773c2b4b976d49dd1236d8902be4ad0320e6b786a1522f601052b76f370",
+        "owners": [
+          "cross-vectors"
+        ]
+      },
+      {
+        "path": "specs/cross-vectors/testing.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "a93c9b88f077c31714fb134f085dc9beed3c60005df9ab74c3155063fa8b62b3",
+        "entry_digest": "96219b226a1aaaad0c513e24ac989bc07ee9f42bf763a24c7659777538e6be0b",
+        "owners": [
+          "cross-vectors"
+        ]
+      },
+      {
+        "path": "specs/protocol/context.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "5aa794894ef7acca67c9005d6683c92ac5ffed1e37c4e760fb192584b6ce5a66",
+        "entry_digest": "46e3d580cf7138bbf06432dcc56183bdea69b0e7f9d1261deda798b31905682b",
+        "owners": [
+          "protocol"
+        ]
+      },
+      {
+        "path": "specs/protocol/protocol.spec.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "64be76d1468de60e65fde2c2cf1d8e1d6eb95c8f15bf4ae954ad82dca04af339",
+        "entry_digest": "3a9fc33d620fb87fe90b1e0784405bf27222749402f9f83864a8c3cbc1eb9e32",
+        "owners": [
+          "protocol"
+        ]
+      },
+      {
+        "path": "specs/protocol/requirements.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "51d750a09cd2cdd9ab3504d56d32a78aa67f067319fa7636163abae33f5324a4",
+        "entry_digest": "38a9cd4fde6a94f768655adf38e31a749219ae558b6e655c2b5f948361288aed",
+        "owners": [
+          "protocol"
+        ]
+      },
+      {
+        "path": "specs/protocol/tasks.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "ed6e9205a13ffdc73798c6f8f05099818a5cd7e087eccaa17f232281e96e05c9",
+        "entry_digest": "9ab704fe33f32f5b8d7b357451b478a991337f706d9f7afa092e874f7358b4d6",
+        "owners": [
+          "protocol"
+        ]
+      },
+      {
+        "path": "specs/protocol/testing.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "2449bd1c75812cb6c48f4e8a8f105cc6d96691e5c07c9c512bbf61f8df96f8c9",
+        "entry_digest": "c8ac78d8744f61927fa29593895981f5ebe7409a7742bb67528d52d15ede35b6",
+        "owners": [
+          "protocol"
+        ]
+      },
+      {
+        "path": "specs/psk/context.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "a647a42989a823da6ee874ecb6651cc887f9753e7d6d8bf8b604ce19e5b21a31",
+        "entry_digest": "6d351cb4597de1d1759eefe0f75fe61ca83b01b8b3574805659a4376fb777f68",
+        "owners": [
+          "psk"
+        ]
+      },
+      {
+        "path": "specs/psk/psk.spec.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "1bde3285bb1520a3cacddd765cb805080c49f60b74743791daa2b03bdf32d8cf",
+        "entry_digest": "a23486ae5a7f0c528567ac48358c4c2c12972fe7d9fb612a6ac91223208fece8",
+        "owners": [
+          "psk"
+        ]
+      },
+      {
+        "path": "specs/psk/requirements.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "b2b4747d284289c0ac8358f15a2f3f313c3d0cbcb2dd55a0d7ed767fe825b114",
+        "entry_digest": "ed8442da720c8dba178efa1f3c47f8cf43f7423caf5a004fafe9e28f389192e3",
+        "owners": [
+          "psk"
+        ]
+      },
+      {
+        "path": "specs/psk/tasks.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "653101b91b328520e3b215df1aa50327c704d6154528cb8c94a78c4abc372c89",
+        "entry_digest": "471ceea9a113aeed6658298f10d4c7ca8a9e5537936a2ef9e48d63d7ee24aa4c",
+        "owners": [
+          "psk"
+        ]
+      },
+      {
+        "path": "specs/psk/testing.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "9811f33ff50ce7f9e16622fef9f2afbd0227cd1983c62cece8c8461e617d1221",
+        "entry_digest": "e916a034ef76fb0e3b5671207d9cb2b8c064f18ec8b1af0d536d75de12046133",
+        "owners": [
+          "psk"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/AlgoChat.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "6c37492152eb952321101a80b2e5bfdb7014ecd7a8369105ca93a7ca432561b0",
+        "entry_digest": "029901adbf85a6f9237bab5dbaf939366a8c1e8b77fefaa798df92c4b6c00571",
+        "owners": [
+          "client"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/Blockchain.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "19d59bd741a9b7230ab28f0d9c79e44c67cb84023fd336a0fde8496f121dd645",
+        "entry_digest": "af994470cdc827e62551388376be9027ff0be0f3fa49cc312e9e3ba86c906bbd",
+        "owners": [
+          "client"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/Crypto.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "fb14720586f031ff849142eb4b1640aa357ff43d326d9ef8875603277e29411e",
+        "entry_digest": "e90b91b7cc473feb4bab6a96e3e5351d3196769b961f8a1138116ee44a40a2fa",
+        "owners": [
+          "protocol"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/Envelope.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "d17e414b90c10989fde414a83a3c1f6efe75f12b922f049bba7ea7aebbe31dcc",
+        "entry_digest": "bd613d0688d6ce766e6704c0fa6467e120cca39f7eb1744c1d32040b51829e7f",
+        "owners": [
+          "protocol"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/Keys.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "38743f4c86bd1c3a10c2d3ab305dcff341d038024d3fa94dd21a9a76792165a2",
+        "entry_digest": "26ab99b7f296c5e525d3bbd25cfedd2bb7dfe9d5e4d67f2c40f96f1da2939599",
+        "owners": [
+          "protocol"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/MessagePayload.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "02fc65aa0d071de4d202bf406aebc87171fb4b2acd821f5b0e8595ccd2de1221",
+        "entry_digest": "e8a0a0c3b7b94bad2da53883790232776cb35fe8bca2666464e80417758d4e47",
+        "owners": [
+          "protocol"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/Models.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "9fd97a88ab0fc86d316b5711c4e2f9e6bcf8ff819380e080210aa92338a8cff7",
+        "entry_digest": "ace63fe97c9ea0fedbbd054cdd6536c7e64e87cdcdd62284a44a211ed81dca49",
+        "owners": [
+          "client"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/PSKCrypto.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "ba55b8eac61f85f16bb2606d2d0f048b9c5955ea49d80e3779110b744cee3656",
+        "entry_digest": "7c025121a78ce521803f237c9fb5adeff86cd859f3d0d6c26eb7779413043475",
+        "owners": [
+          "psk"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/PSKEnvelope.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "fcf9f071edf1896ae47fad3890cf23223db5489bc2cd8136f4cfc0946a3f5008",
+        "entry_digest": "f80d6c0fac8d20aefb57ce01de794359df2da2e5c62199c8a8314a9e5c22d80d",
+        "owners": [
+          "psk"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/PSKExchange.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "2d5763d623fa36828292e28ab91558a19f2fb47ed590e81bfffebaf948c0888e",
+        "entry_digest": "cf1e08cc65ef9b35445ba248a800bbc2eba7a8b98f8ba60ff081e5dc84c1bbd0",
+        "owners": [
+          "psk"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/PSKRatchet.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "2c712cc15caaaef7e0453973e43e6c71a3aca6ac10340f23fc935f42c16e4914",
+        "entry_digest": "2a0da1237a8e02c3e50f1d47d02ae8c160d3f7c77f822b4b3197aa9fa3827fa6",
+        "owners": [
+          "psk"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/PSKState.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "56d28e1a106ae7202192c6ea4ed1a61c8aee94c2d6f6e5e8f0595ca2a399eade",
+        "entry_digest": "dfd50dc22ad907d1e0aa0a3794e89a63b311fd44cef2c7efa80924f786b41f5e",
+        "owners": [
+          "psk"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/PSKTypes.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "a3a32e3a454af8a064d10dcf3b4c6b6d0795ca32328e5578ae3f8c924f8e9c97",
+        "entry_digest": "5a14fbb13908d85670c7a4220d636674941fa3e5addba74fa5be68e9e609f44b",
+        "owners": [
+          "psk"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/Queue.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "2858e0c15fe4eac9aa5e3045efe5eb6c1fb3cc06d9b5807f8f28c7ab1af89788",
+        "entry_digest": "4128a28aaab2deaa6719b8dac05457c1c2f4cb338929b1a4959d14a458bc5742",
+        "owners": [
+          "client"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/Signature.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "07ba278c706f2f5a9fa004a97b20c9f992095acd58ad2164a67e5295f44f7f29",
+        "entry_digest": "29c062ac94f9c802f663995aa0a0e66982f015a2afb9e32135ab2436e11c2582",
+        "owners": [
+          "protocol"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/Storage.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "b16ac71c598726ba1c2885704da74e5bc37432536b6a52a5d1816bb2be348ff3",
+        "entry_digest": "0bdef51c5e702ec56d91d9bc9179c427501e8edb3d78fdd005985a8879d4176c",
+        "owners": [
+          "client"
+        ]
+      },
+      {
+        "path": "src/main/kotlin/com/corvidlabs/algochat/Types.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "ea4571eb6ab48163ce501b441206ca4ca571a6a24060a926983ce55b2fd4552c",
+        "entry_digest": "834ad15acd5ea514630e361cef79d16c242af2a793c935eaaa46c310756a924e",
+        "owners": [
+          "protocol"
+        ]
+      },
+      {
+        "path": "src/test/kotlin/com/corvidlabs/algochat/AlgoChatClientTest.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "2c357d28f53a916ecbac86dbc251041fa1ff0f0caa693ed991e1bad9bbd8fa64",
+        "entry_digest": "187a487afe28c88f7897a1457093c19cad644abc2c3fce94cc0c3a1725a4df8a",
+        "owners": [
+          "@exact:test"
+        ]
+      },
+      {
+        "path": "src/test/kotlin/com/corvidlabs/algochat/AlgoChatTest.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "869ee5d9780d8f7aac3686a6dc2485168c41571e8bd0cc2646114a22ed07622c",
+        "entry_digest": "ab11a3ed08081f6369b0010193d95480f33004e57a2b14db30879a020f791361",
+        "owners": [
+          "@exact:test"
+        ]
+      },
+      {
+        "path": "src/test/kotlin/com/corvidlabs/algochat/BlockchainTest.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "c628b2bd4f8db8785f0b534c7983244b7150b19485f974bf39b6578c1c6edbab",
+        "entry_digest": "ca387a00841cb9bcd31e32141afbdd98bb5178e7c907115cbc1199033f83ba3c",
+        "owners": [
+          "@exact:test"
+        ]
+      },
+      {
+        "path": "src/test/kotlin/com/corvidlabs/algochat/CrossImplTest.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "055e4bbb2af7271898f6d00010a72e4839ef3844fdb79dc2cdc84989b21bc178",
+        "entry_digest": "402769a28d16ddf698f845528f3fe3c8dc7dce5213f5d3825d71c6b698573b6d",
+        "owners": [
+          "@exact:test"
+        ]
+      },
+      {
+        "path": "src/test/kotlin/com/corvidlabs/algochat/EnvelopeTest.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "e13bd89a02d7953aececf356aaf41037bcbe3f2ac7d996e50ecafe509ee4f987",
+        "entry_digest": "12bc3de5d905f9abccdc187614ab40bd6b9830ac1edf9e320b1257a5540e5679",
+        "owners": [
+          "@exact:test"
+        ]
+      },
+      {
+        "path": "src/test/kotlin/com/corvidlabs/algochat/MessagePayloadTest.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "e0ac8b40b6110c75e9cc92131257d4239f2aa8b4c15757a891b48c047c77b5d5",
+        "entry_digest": "36890ac0aa4983a059f67986173555bfc4572841f0b39b1d368fd853aa0ddba0",
+        "owners": [
+          "@exact:test"
+        ]
+      },
+      {
+        "path": "src/test/kotlin/com/corvidlabs/algochat/ModelsTest.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "242d432a2a357ddcbe8e8cd7cd7cf490b22369b3eeddb07af4f52fcab6d48f4d",
+        "entry_digest": "0c2ce4211dc64e3ee17c386ba3c4ff85141931d0af314bf5a8239ba691c7bada",
+        "owners": [
+          "@exact:test"
+        ]
+      },
+      {
+        "path": "src/test/kotlin/com/corvidlabs/algochat/PSKTest.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "09908392ebe7569931e2956951128600da062df0d0a0f6b0daff88d917ccf6f3",
+        "entry_digest": "6051dd8e9055b5df1461dced70ff368fc21160b8d91bf8d48555b774d46cc2a7",
+        "owners": [
+          "@exact:test"
+        ]
+      },
+      {
+        "path": "src/test/kotlin/com/corvidlabs/algochat/QueueTest.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "2b7c3c154f6c94d3a974fd0ee8502ec193285938e798c050f7137538eacf5381",
+        "entry_digest": "b343c6308dca70401c5a631244155d9bb448489ac6934bcd4739c1b0388d6a68",
+        "owners": [
+          "@exact:test"
+        ]
+      },
+      {
+        "path": "src/test/kotlin/com/corvidlabs/algochat/SignatureTest.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "883e59e65e8ccbb65616748ff414fd0279829dda254878b4d76f012dadf91cbc",
+        "entry_digest": "40d1654d8d388e8c2f6977c9f643358bf53c52bdaaf4f5c0d6c70145e8273b17",
+        "owners": [
+          "@exact:test"
+        ]
+      },
+      {
+        "path": "src/test/kotlin/com/corvidlabs/algochat/StorageTest.kt",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "9989b133fc037570da88162fc8c424e15649debc384cee93fbb6bf7aaa11c227",
+        "entry_digest": "afd2627033a6aff86be3da0ec50c5d04882ef86085559649e65828886681da8c",
+        "owners": [
+          "@exact:test"
+        ]
+      }
+    ]
+  },
   "passed": true,
   "commands": [
     {

@@ -23,4 +23,4 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: CorvidLabs Trust gate
         id: trust
-        uses: CorvidLabs/trust@9d32b5786d2e9e4d39fc581c0091c721ee3d4226 # v1.0.0
+        uses: CorvidLabs/trust@a239f78658e5ad0f12fa230f494890e40c6e4d7b # v1.1.1

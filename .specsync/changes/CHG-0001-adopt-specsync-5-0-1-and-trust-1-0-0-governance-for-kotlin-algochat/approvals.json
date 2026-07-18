@@ -20,6 +20,13 @@
       "timestamp": 1784012839,
       "digest": "07b9636ec7b47c58615919cc09a2dd383a36ba5efed4b1d141dc3d3b96e0340c",
       "note": "Fresh closing approval after the unchanged governance migration passed the current test, build, and JAR lane alongside complete canonical SDD adoption; prior approval and reopen audit are preserved."
+    },
+    {
+      "gate": "acceptance",
+      "actor": "user:0xLeif",
+      "timestamp": 1784412499,
+      "digest": "fffc63bdf130a3febc307671e87bc292260cb3163c88c2da7f27ccef7e5758ad",
+      "note": "Re-acceptance with the Trust consumer pin at the released v1.1.1 immutable commit; canonical deltas were already integrated and were not replayed."
     }
   ],
   "reopenings": [
@@ -56,6 +63,40 @@
       },
       "stale_acceptance_input_digest": "060b5929aa9f1f9284c1049fb0abad9bae7b139ef9c2f5202f41045436a95dfe",
       "current_acceptance_input_digest": "91b30d7b3f1e01ccc43da0829519600e8a3510b8b3b562b034380d3e2be0136a"
+    },
+    {
+      "schema_version": 1,
+      "change_id": "CHG-0001-adopt-specsync-5-0-1-and-trust-1-0-0-governance-for-kotlin-algochat",
+      "actor": "user:0xLeif",
+      "reason": "Trust consumer pin moves to the released v1.1.1 immutable commit; the Trust workflow is a governed delivery input of this change, so accepted verification is stale.",
+      "timestamp": 1784412125,
+      "from_state": "accepted",
+      "to_state": "verifying",
+      "superseded_approval": {
+        "gate": "acceptance",
+        "actor": "user:0xLeif",
+        "timestamp": 1784012839,
+        "digest": "07b9636ec7b47c58615919cc09a2dd383a36ba5efed4b1d141dc3d3b96e0340c",
+        "note": "Fresh closing approval after the unchanged governance migration passed the current test, build, and JAR lane alongside complete canonical SDD adoption; prior approval and reopen audit are preserved."
+      },
+      "prior_verification": {
+        "timestamp": 1784012835,
+        "commit": "ade75ccb12a39fcaca9aae4cc225b318dc63efd4",
+        "contract_digest": "7ff60e5d75b8e503e544bbbdcb22625d14de272c0114bc26c56042b8ae6b1698",
+        "workspace_digest": "5221b65a6aa661e15fe7d75cb2a826d703d97e2065e752e91d3d7b4d20385650",
+        "acceptance_input_digest": "91b30d7b3f1e01ccc43da0829519600e8a3510b8b3b562b034380d3e2be0136a",
+        "passed": true,
+        "commands": [
+          {
+            "command": "fledge lanes run verify",
+            "success": true,
+            "exit_code": 0
+          }
+        ],
+        "requirement_ids": []
+      },
+      "stale_acceptance_input_digest": "91b30d7b3f1e01ccc43da0829519600e8a3510b8b3b562b034380d3e2be0136a",
+      "current_acceptance_input_digest": "ea291b1a1a962af7b739254d0b8022ba7dfb4d6a316b10e9adf34ebbd8435eb0"
     }
   ]
 }
