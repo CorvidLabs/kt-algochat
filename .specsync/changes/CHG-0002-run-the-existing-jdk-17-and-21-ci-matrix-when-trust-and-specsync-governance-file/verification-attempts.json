@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "attempts": [
+    {
+      "timestamp": 1784412537,
+      "commit": "6e1fcaaa63fffd6e5a602c896c242ef56fecdb87",
+      "contract_digest": "ee3ac9c64331cf022bd1c36fafa6cebed6f70a9c9f8a30410ec06b1d702bdf36",
+      "workspace_digest": "6e389d92190c765dc482005d8bfe9cd2af8d3db7fa9f087c3ad24b6ce48b01cd",
+      "passed": true,
+      "commands": [
+        {
+          "command": "fledge lanes run verify",
+          "success": true,
+          "exit_code": 0
+        }
+      ],
+      "requirement_ids": [
+        "REQ-client-001",
+        "REQ-client-002",
+        "REQ-client-003",
+        "REQ-client-004",
+        "REQ-client-005",
+        "REQ-cross-vectors-001",
+        "REQ-cross-vectors-002",
+        "REQ-cross-vectors-003",
+        "REQ-cross-vectors-004",
+        "REQ-protocol-001",
+        "REQ-protocol-002",
+        "REQ-protocol-003",
+        "REQ-protocol-004",
+        "REQ-protocol-005",
+        "REQ-psk-001",
+        "REQ-psk-002",
+        "REQ-psk-003",
+        "REQ-psk-004",
+        "REQ-psk-005"
+      ]
+    }
+  ]
+}

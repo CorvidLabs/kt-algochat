@@ -34,6 +34,69 @@
       "timestamp": 1784012603,
       "digest": "7f379f10d631dd1309e5eb14eb44b6a55c8e4bdc336e159892bdb8749d1e6a1b",
       "note": "Closing approval after strict 100 percent source coverage, 218 of 218 documented Kotlin exports, 19 requirement evidence links, a forced fresh 292-test pass with zero failures, and successful test/build/JAR verification."
+    },
+    {
+      "gate": "acceptance",
+      "actor": "user:0xLeif",
+      "timestamp": 1784412576,
+      "digest": "babce40f816148d3b4f2bf9870544dd9a7a073c7fd465b96711828981a75dc83",
+      "note": "Re-acceptance with the Trust consumer pin at the released v1.1.1 immutable commit; canonical deltas were already integrated and were not replayed."
+    }
+  ],
+  "reopenings": [
+    {
+      "schema_version": 1,
+      "change_id": "CHG-0002-run-the-existing-jdk-17-and-21-ci-matrix-when-trust-and-specsync-governance-file",
+      "actor": "user:0xLeif",
+      "reason": "Trust consumer pin moves to the released v1.1.1 immutable commit; the Trust workflow is a governed delivery input of this change, so accepted verification is stale.",
+      "timestamp": 1784412201,
+      "from_state": "accepted",
+      "to_state": "verifying",
+      "superseded_approval": {
+        "gate": "acceptance",
+        "actor": "user:0xLeif",
+        "timestamp": 1784012603,
+        "digest": "7f379f10d631dd1309e5eb14eb44b6a55c8e4bdc336e159892bdb8749d1e6a1b",
+        "note": "Closing approval after strict 100 percent source coverage, 218 of 218 documented Kotlin exports, 19 requirement evidence links, a forced fresh 292-test pass with zero failures, and successful test/build/JAR verification."
+      },
+      "prior_verification": {
+        "timestamp": 1784012594,
+        "commit": "5762cf53ab8e788b89d11494c17b40c508890e7f",
+        "contract_digest": "ee3ac9c64331cf022bd1c36fafa6cebed6f70a9c9f8a30410ec06b1d702bdf36",
+        "workspace_digest": "45c4a008d0302230c573a9053ce9e8cd5c9cbd34703640a488c5a439301fb2d0",
+        "acceptance_input_digest": "c5ce1da46b65abc8470a33f4569366be7a9d53882d9576c1d3c44f2163ac8ea4",
+        "passed": true,
+        "commands": [
+          {
+            "command": "fledge lanes run verify",
+            "success": true,
+            "exit_code": 0
+          }
+        ],
+        "requirement_ids": [
+          "REQ-client-001",
+          "REQ-client-002",
+          "REQ-client-003",
+          "REQ-client-004",
+          "REQ-client-005",
+          "REQ-cross-vectors-001",
+          "REQ-cross-vectors-002",
+          "REQ-cross-vectors-003",
+          "REQ-cross-vectors-004",
+          "REQ-protocol-001",
+          "REQ-protocol-002",
+          "REQ-protocol-003",
+          "REQ-protocol-004",
+          "REQ-protocol-005",
+          "REQ-psk-001",
+          "REQ-psk-002",
+          "REQ-psk-003",
+          "REQ-psk-004",
+          "REQ-psk-005"
+        ]
+      },
+      "stale_acceptance_input_digest": "c5ce1da46b65abc8470a33f4569366be7a9d53882d9576c1d3c44f2163ac8ea4",
+      "current_acceptance_input_digest": "cf0001618d9431156b24000c8301bd3a0e4a8b3cdd325b7e74fd0f27b054bc16"
     }
   ]
 }
