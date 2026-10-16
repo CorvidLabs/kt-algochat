@@ -16,3 +16,4 @@ The PSK variant adds an out-of-band secret and ratchet position to the normal as
 - A distinct protocol id enables unambiguous dispatch.
 - A bounded receive window tolerates limited reordering while rejecting replay.
 - Receive state commits only after the supplied decrypt block succeeds.
+- PSK plaintext max is 4096 minus the 130-byte header and 16-byte tag.

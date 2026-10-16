@@ -19,8 +19,30 @@ object Protocol {
     /** Size of the encrypted sender key (32-byte key + 16-byte tag). */
     const val ENCRYPTED_SENDER_KEY_SIZE = 48
 
-    /** Maximum payload size in bytes. */
-    const val MAX_PAYLOAD_SIZE = 882
+    /** Maximum Algorand note size in bytes. */
+    const val MAX_NOTE_SIZE = 4096
+
+    /**
+     * Maximum plaintext size in bytes.
+     *
+     * 4096-byte note, minus the 126-byte header and 16-byte Poly1305 tag.
+     */
+    const val MAX_PAYLOAD_SIZE = MAX_NOTE_SIZE - HEADER_SIZE - TAG_SIZE
+
+    /**
+     * Payment fee, in microAlgos, for a note of [noteBytes] at the network [minFee].
+     *
+     * The first 1024 bytes cost one [minFee]. Each byte past 1024 adds one
+     * ten-thousandth of [minFee], rounded up once. This library has no Falcon
+     * signer, so the scheme contribution stays one [minFee].
+     */
+    fun paymentFee(noteBytes: Int, minFee: Long): Long {
+        require(noteBytes >= 0) { "noteBytes must be non-negative" }
+        require(minFee >= 0L) { "minFee must be non-negative" }
+        val over = (noteBytes - 1024).coerceAtLeast(0)
+        val surcharge = (over.toLong() * minFee + 9999L) / 10000L
+        return minFee + surcharge
+    }
 
     /** Size of the nonce in bytes. */
     const val NONCE_SIZE = 12

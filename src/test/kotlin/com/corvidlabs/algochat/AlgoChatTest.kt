@@ -181,6 +181,73 @@ class AlgoChatTest {
     }
 
     @Test
+    fun `note ceiling keeps the header and tag and raises plaintext to 3954`() {
+        assertEquals(126, Protocol.HEADER_SIZE)
+        assertEquals(16, Protocol.TAG_SIZE)
+        assertEquals(4096, Protocol.MAX_NOTE_SIZE)
+        assertEquals(3954, Protocol.MAX_PAYLOAD_SIZE)
+    }
+
+    @Test
+    fun `legacy 882 byte plaintext still encrypts within 1024 bytes`() {
+        val alice = aliceKeys()
+        val bob = bobKeys()
+        val message = "A".repeat(882)
+
+        val envelope = Crypto.encryptMessage(
+            message,
+            alice.privateKey,
+            alice.publicKey,
+            bob.publicKey
+        )
+        val encoded = envelope.encode()
+
+        assertTrue(encoded.size <= 1024)
+        val decrypted = Crypto.decryptMessage(envelope, bob.privateKey, bob.publicKey)
+        assertNotNull(decrypted)
+        assertEquals(message, decrypted.text)
+    }
+
+    @Test
+    fun `maximum plaintext encodes to a 4096 byte note`() {
+        val alice = aliceKeys()
+        val bob = bobKeys()
+        val message = "A".repeat(Protocol.MAX_PAYLOAD_SIZE)
+
+        val encoded = Crypto.encryptMessage(
+            message,
+            alice.privateKey,
+            alice.publicKey,
+            bob.publicKey
+        ).encode()
+
+        assertEquals(4096, encoded.size)
+    }
+
+    @Test
+    fun `one byte past the maximum fails before an envelope is built`() {
+        val alice = aliceKeys()
+        val bob = bobKeys()
+        val message = "A".repeat(Protocol.MAX_PAYLOAD_SIZE + 1)
+
+        assertThrows<AlgoChatException.EncryptionFailed> {
+            Crypto.encryptMessage(
+                message,
+                alice.privateKey,
+                alice.publicKey,
+                bob.publicKey
+            )
+        }
+    }
+
+    @Test
+    fun `note fee at minFee 1000`() {
+        assertEquals(1000L, Protocol.paymentFee(1024, 1000L))
+        assertEquals(1098L, Protocol.paymentFee(2000, 1000L))
+        assertEquals(1308L, Protocol.paymentFee(4096, 1000L))
+    }
+
+    @Test
     fun `is chat message detection`() {
         val validHeader = byteArrayOf(Protocol.VERSION, Protocol.PROTOCOL_ID) + ByteArray(Protocol.HEADER_SIZE - 2)
         assertTrue(isChatMessage(validHeader))
