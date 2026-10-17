@@ -1,3 +1,5 @@
+> **This repository has moved.** Development continues in [CorvidLabs/algochat](https://github.com/CorvidLabs/algochat) in the [`kt/`](https://github.com/CorvidLabs/algochat/tree/main/kt) directory. This copy stays public so existing package versions keep resolving. Open new work in the monorepo.
+
 # kt-algochat
 
 [![CI](https://img.shields.io/github/actions/workflow/status/CorvidLabs/kt-algochat/ci.yml?label=CI&branch=main)](https://github.com/CorvidLabs/kt-algochat/actions/workflows/ci.yml)
