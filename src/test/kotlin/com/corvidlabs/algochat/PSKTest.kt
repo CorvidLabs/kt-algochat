@@ -354,6 +354,76 @@ class PSKTest {
     }
 
     @Test
+    fun `PSK note ceiling keeps the header and tag and raises plaintext to 3950`() {
+        assertEquals(130, PSKProtocol.HEADER_SIZE)
+        assertEquals(16, PSKProtocol.TAG_SIZE)
+        assertEquals(3950, PSKProtocol.MAX_PAYLOAD_SIZE)
+    }
+
+    @Test
+    fun `legacy 878 byte PSK plaintext still encrypts within 1024 bytes`() {
+        val alice = aliceKeys()
+        val bob = bobKeys()
+        val psk = PSKRatchet.derivePSKAtCounter(TEST_PSK, 0u)
+        val message = "A".repeat(878)
+
+        val envelope = PSKCrypto.encryptMessage(
+            message,
+            alice.privateKey,
+            alice.publicKey,
+            bob.publicKey,
+            psk,
+            0u
+        )
+        val encoded = PSKEnvelopeCodec.encode(envelope)
+
+        assertTrue(encoded.size <= 1024)
+        val decrypted = PSKCrypto.decryptMessage(envelope, bob.privateKey, bob.publicKey, psk)
+        assertNotNull(decrypted)
+        assertEquals(message, decrypted.text)
+    }
+
+    @Test
+    fun `PSK maximum plaintext encodes to a 4096 byte note`() {
+        val alice = aliceKeys()
+        val bob = bobKeys()
+        val psk = PSKRatchet.derivePSKAtCounter(TEST_PSK, 0u)
+        val message = "A".repeat(PSKProtocol.MAX_PAYLOAD_SIZE)
+
+        val encoded = PSKEnvelopeCodec.encode(
+            PSKCrypto.encryptMessage(
+                message,
+                alice.privateKey,
+                alice.publicKey,
+                bob.publicKey,
+                psk,
+                0u
+            )
+        )
+
+        assertEquals(4096, encoded.size)
+    }
+
+    @Test
+    fun `one byte past the PSK maximum fails before an envelope is built`() {
+        val alice = aliceKeys()
+        val bob = bobKeys()
+        val psk = PSKRatchet.derivePSKAtCounter(TEST_PSK, 0u)
+        val message = "A".repeat(PSKProtocol.MAX_PAYLOAD_SIZE + 1)
+
+        assertThrows<AlgoChatException.EncryptionFailed> {
+            PSKCrypto.encryptMessage(
+                message,
+                alice.privateKey,
+                alice.publicKey,
+                bob.publicKey,
+                psk,
+                0u
+            )
+        }
+    }
+
+    @Test
     fun `PSK full encode decode decrypt roundtrip`() {
         val alice = aliceKeys()
         val bob = bobKeys()

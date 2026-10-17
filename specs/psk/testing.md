@@ -6,7 +6,7 @@ spec: psk.spec.md
 
 ### Unit Tests
 
-- Run `PSKTest` for known-answer derivations, counter boundaries, replay and rollback behavior, envelope layout, hybrid authentication, and exchange URI validation.
+- Run `PSKTest` for known-answer derivations, counter boundaries, replay and rollback behavior, envelope layout, note ceiling, hybrid authentication, and exchange URI validation.
 
 ### Integration Tests
 

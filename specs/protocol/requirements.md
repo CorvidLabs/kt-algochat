@@ -14,6 +14,7 @@ spec: protocol.spec.md
 3. **REQ-protocol-003**: Authenticated encryption round-trips for sender and recipient and rejects the wrong identity or tampering; `AlgoChatTest` and `CrossImplTest` provide evidence.
 4. **REQ-protocol-004**: Structured text/reply payloads round-trip while legacy UTF-8 remains readable; `MessagePayloadTest` covers JSON, reply, legacy, malformed, and key-publish cases.
 5. **REQ-protocol-005**: Encryption-key signatures verify only for the correct key and signer, and fingerprints are deterministic; `SignatureTest` covers valid and invalid signatures and fingerprint formatting.
+6. **REQ-protocol-006**: The note ceiling is 4096 bytes. A 882-byte plaintext still encrypts into at most 1024 bytes. A 3954-byte plaintext encodes to exactly 4096 bytes. One extra byte fails before a transaction is built. At minFee 1000, notes of 1024, 2000, and 4096 bytes cost 1000, 1098, and 1308. `AlgoChatTest` covers these cases.
 
 ## Constraints
 
@@ -59,4 +60,11 @@ Encryption-key signatures SHALL verify only for the correct key and Ed25519 sign
 
 Acceptance Criteria
 - Existing valid, invalid, wrong-key, and fingerprint cases pass in `SignatureTest`.
+
+### REQ-protocol-006
+
+The note ceiling SHALL be 4096 bytes. Plaintext of 882 bytes SHALL still encrypt into a note of at most 1024 bytes. Plaintext of 3954 bytes SHALL encode to exactly 4096 bytes, and one extra byte SHALL fail before a transaction is built. The payment fee SHALL be one minFee plus the rounded note surcharge.
+
+Acceptance Criteria
+- `AlgoChatTest` accepts an 882-byte plaintext at 1024 bytes or fewer, encodes the 3954-byte maximum to exactly 4096 bytes, rejects one extra byte, and checks fees 1000, 1098, and 1308 at minFee 1000.
 

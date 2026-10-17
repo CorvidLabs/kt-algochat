@@ -19,8 +19,12 @@ object PSKProtocol {
     /** Size of the encrypted sender key (32-byte key + 16-byte tag). */
     const val ENCRYPTED_SENDER_KEY_SIZE = 48
 
-    /** Maximum payload size in bytes. */
-    const val MAX_PAYLOAD_SIZE = 878
+    /**
+     * Maximum plaintext size in bytes.
+     *
+     * 4096-byte note, minus the 130-byte header and 16-byte Poly1305 tag.
+     */
+    const val MAX_PAYLOAD_SIZE = Protocol.MAX_NOTE_SIZE - HEADER_SIZE - TAG_SIZE
 
     /** Number of positions per session for the ratchet. */
     const val SESSION_SIZE = 100

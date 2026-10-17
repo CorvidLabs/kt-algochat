@@ -1,6 +1,6 @@
 ---
 module: psk
-version: 1.0.1
+version: 1.0.2
 status: active
 files:
   - src/main/kotlin/com/corvidlabs/algochat/PSKCrypto.kt
@@ -54,10 +54,10 @@ Define the optional AlgoChat v1 pre-shared-key protocol: deterministic ratchet d
 | `peerId` | Existing psk symbol; its behavior and invariants are defined by the owning API group below. |
 | `VERSION` | Existing psk symbol; its behavior and invariants are defined by the owning API group below. |
 | `PROTOCOL_ID` | Existing psk symbol; its behavior and invariants are defined by the owning API group below. |
-| `HEADER_SIZE` | Existing psk symbol; its behavior and invariants are defined by the owning API group below. |
-| `TAG_SIZE` | Existing psk symbol; its behavior and invariants are defined by the owning API group below. |
+| `HEADER_SIZE` | Fixed PSK header size, 130 bytes. |
+| `TAG_SIZE` | Poly1305 tag size, 16 bytes. |
 | `ENCRYPTED_SENDER_KEY_SIZE` | Existing psk symbol; its behavior and invariants are defined by the owning API group below. |
-| `MAX_PAYLOAD_SIZE` | Existing psk symbol; its behavior and invariants are defined by the owning API group below. |
+| `MAX_PAYLOAD_SIZE` | Maximum PSK plaintext, 3950 bytes (4096 minus the 130-byte header and 16-byte tag). |
 | `SESSION_SIZE` | Existing psk symbol; its behavior and invariants are defined by the owning API group below. |
 | `COUNTER_WINDOW` | Existing psk symbol; its behavior and invariants are defined by the owning API group below. |
 | `NONCE_SIZE` | Existing psk symbol; its behavior and invariants are defined by the owning API group below. |
@@ -87,6 +87,7 @@ The complete member-level PSK contract also includes these operations, fields, a
 4. Receiving rejects replays and counters outside the configured forward window; failed decryption does not consume a counter.
 5. Hybrid encryption requires both the correct 32-byte PSK and the correct X25519 identity; neither factor alone yields plaintext.
 6. Exchange decoding requires the v1 scheme, an address, and exactly 32 decoded PSK bytes.
+7. A PSK note is at most 4096 bytes. The header stays 130 bytes and the tag stays 16 bytes, so plaintext is at most 3950 bytes. A plaintext of 878 bytes still fits in 1024 bytes. One byte past 3950 is rejected before a transaction is built.
 
 ## Behavioral Examples
 
@@ -98,6 +99,14 @@ Then the receiver derives the matching position key, authenticates plaintext, an
 Given a previously accepted counter
 When the same envelope is received again
 Then PSKState rejects it as a replay before returning plaintext
+
+Given a 3950-byte PSK plaintext
+When PSKCrypto.encryptMessage encodes it
+Then the note is exactly 4096 bytes
+
+Given a 3951-byte PSK plaintext
+When PSKCrypto.encryptMessage is called
+Then EncryptionFailed is thrown and no envelope is returned
 ```
 
 ## Error Cases
@@ -108,6 +117,7 @@ Then PSKState rejects it as a replay before returning plaintext
 | `DecryptionFailed` | PSK, asymmetric identity, nonce, counter, or ciphertext authentication is wrong. | Return no plaintext and do not commit receive state. |
 | `IllegalArgumentException` | Exchange URI scheme/parameters or PSK size is invalid. | Reject the exchange value. |
 | `IllegalStateException` | Send counter would wrap or receive counter violates replay/window policy. | Preserve a valid prior state. |
+| `EncryptionFailed` | Plaintext exceeds 3950 bytes. | Reject before an envelope or transaction is built. |
 
 ## Dependencies
 
@@ -120,6 +130,7 @@ Then PSKState rejects it as a replay before returning plaintext
 | Version | Date | Changes |
 |---|---|---|
 | 1.0.0 | 2026-07-14 | Canonically document the existing PSK envelope, ratchet, state, crypto, and exchange behavior. |
+| 1.0.2 | 2026-10-16 | Raise the PSK plaintext max to 3950 so a full note is 4096 bytes. Header stays 130 and the tag stays 16. |
 | 2026-07-14 | CHG-0002-run-the-existing-jdk-17-and-21-ci-matrix-when-trust-and-specsync-governance-file: Complete Kotlin AlgoChat SDD adoption and run the native CI matrix |
 
 ## SDD Adoption

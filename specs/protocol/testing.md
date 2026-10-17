@@ -6,7 +6,7 @@ spec: protocol.spec.md
 
 ### Unit Tests
 
-- Run `AlgoChatTest`, `EnvelopeTest`, `MessagePayloadTest`, and `SignatureTest` for key, crypto, wire, payload, and signature behavior.
+- Run `AlgoChatTest`, `EnvelopeTest`, `MessagePayloadTest`, and `SignatureTest` for key, crypto, wire, payload, signature, note-ceiling, and note-fee behavior.
 
 ### Integration Tests
 
